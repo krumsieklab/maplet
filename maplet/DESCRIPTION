@@ -1,0 +1,62 @@
+Package: maplet
+Type: Package
+Title: Metabolomics Anaysis PipeLinE Toolbox
+Version: 0.2.0
+Author: Jan Krumsiek, Elisa Benedetti, Richa Batra, Parviz Gomari, Mustafa Buyukozkan, Annalise Schweickart, Kelsey Chetnik
+Maintainer: Kelsey Chetnik <kelsey.chetnik@gmail.com>
+Description: More about what it does (maybe more than one line)
+    Use four spaces when indenting paragraphs within the Description.
+Depends: R (>= 3.6.0),
+    magrittr,
+    SummarizedExperiment
+biocViews:
+Imports:
+    broom,
+    broom.mixed,
+    data.table,
+    dils,
+    dplyr,
+    formula.tools,
+    gage,
+    gdata,
+    GeneNet,
+    ggbeeswarm,
+    ggforce,
+    ggnetwork,
+    ggplot2,
+    ggrepel,
+    glue,
+    graphite,
+    limma,
+    lmerTest,
+    logging,
+    MASS,
+    MatrixEQTL,
+    matrixStats,
+    network,
+    openxlsx,
+    pathview,
+    pheatmap,
+    psych,
+    purrr,
+    R6,
+    readr,
+    readxl,
+    reshape2,
+    rlang,
+    rmarkdown,
+    S4Vectors,
+    scales,
+    stringr,
+    sva,
+    tibble,
+    tictoc,
+    tidyr,
+    tidyverse,
+    umap,
+    uuid,
+    visNetwork
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.1.1
