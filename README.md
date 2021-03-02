@@ -24,9 +24,9 @@ Users are also encouraged to review the maplet Reference Guide sections 1 and 2.
 ## Want to Get Involved?
 Anyone is welcome to contribute to the maplet R package. For users wishing to contribute a new function, we recommend first reviewing the code and documentation of a few existing functions. We also recommend reviewing section 3 of the maplet Reference Guide.  
 
-**Note**: maplet functions follow strict naming conventions (refer to section 3.2.1 of the maplet Reference Guide for details). A submitted function may initially be rejected if it does not follow the function naming rules. We recommend reaching out to the maintainer (kpc4002@med.cornell.edu) if you have questions about naming and function development.
+**Note**: maplet functions follow strict naming conventions (refer to section 3.2.1 of the maplet Reference Guide for details). A submitted function may initially be rejected if it does not follow the function naming rules.If you have questions about naming and function development, we recommend reaching out to the maintainer, [Kelsey Chetnik](https://krumsieklab.org/).
 
 ## Core Contributors
 The following people have made significant contributions to the development of maplet:  
-Kelsey Chetnik, Jan Krumsiek, Elisa Benedetti, Richa Barta, Parviz Gomari, Mustafa Buyukozkan, Annalise Schweickart, Zeyu Wang,
+Kelsey Chetnik, Jan Krumsiek, Elisa Benedetti, Richa Batra, Daniel Gomari, Mustafa Buyukozkan, Annalise Schweickart, Zeyu Wang,
 Karsten Suhre, Matthias Arnold, and Jonas Zierer.
