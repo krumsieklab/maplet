@@ -27,7 +27,7 @@ mt_plots_box_scatter(
 \arguments{
 \item{D}{\code{SummarizedExperiment} input.}
 
-\item{x}{Name of olumn from colData containing the phenotype to plot on x axis.}
+\item{x}{Name of column from colData containing the phenotype to plot on x axis.}
 
 \item{stat_name}{Index of the entry in metadata(D)$results that contains statistic object.}
 

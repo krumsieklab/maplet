@@ -3,7 +3,7 @@
 #' Creates one box plot or scatter plot per feature based on given sample annotations.
 #'
 #' @param D \code{SummarizedExperiment} input.
-#' @param x Name of olumn from colData containing the phenotype to plot on x axis.
+#' @param x Name of column from colData containing the phenotype to plot on x axis.
 #' @param plot_type Either "box" or "scatter".
 #' @param stat_name Index of the entry in metadata(D)$results that contains statistic object.
 #' @param correct_confounder Confounders to adjust for before plotting, formula notation.
@@ -135,6 +135,10 @@ mt_plots_box_scatter <- function(D,
     }
   }
 
+  # check x is a column in dataset
+  mainvar <- x %>% dplyr::quo_name()
+  if(mainvar %in% dummy == F) stop(glue::glue("No column in plot data frame with name \"{mainvar}\"."))
+  
   if(!full_info){
     # filter down only to the variables needed for plotting
     # need to parse x and ... list
