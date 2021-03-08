@@ -17,7 +17,7 @@ devtools::install_github(repo="krumsieklab/maplet", subdir="maplet")
 **Note:** maplet is in active development. Any commit without a release tag is not guaranteed to be stable. 
 
 ## Getting Started
-Users should review the available examples in the [maplet/examples](https://github.com/krumsieklab/maplet/tree/main/examples) folder. A large example pipeline demonstrating the general setup of a maplet pipeline and most of the functions provided by maplet is provided [here](https://gitlab.com/krumsieklab/mt/-/blob/master/examples/MT_example_pipeline.R). The mt/example folder also contains several stand-alone examples for more specialized functions not included in the main example.  
+Users should review the available examples in the [maplet/examples](/examples) folder. A large example pipeline demonstrating the general setup of a maplet pipeline and most of the functions provided by maplet is provided [here](/examples/example_pipeline.R). The mt/example folder also contains several stand-alone examples for more specialized functions not included in the main example.  
   
 Users are also encouraged to review the maplet Reference Guide sections 1 and 2.
 
