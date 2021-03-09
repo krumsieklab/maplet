@@ -22,6 +22,9 @@ mt_pre_trans_log <- function(D, base=2) {
   stopifnot("SummarizedExperiment" %in% class(D))
   if(base%%1!=0) warning(sprintf("Base not integer. Please double check. Base %f.", base))
 
+  # crash if any zero or negative values present
+  if(any(assay(D) <= 0)) stop("There cannot be zero or negative values in the assay data.")
+  
   # log
   assay(D) = log(assay(D), base = base)
 

@@ -8,7 +8,7 @@ library(maplet)
 data("D_ex1")
 
 # 100 samples and 100 features
-D_ex1 %>% assay() %>% as.data.frame() %>% dim()
+D_ex1 %>% dim()
 # 5 samples are duplicates according to Sample_ID
 colData(D_ex1)$Sample_ID %>% duplicated() %>% sum()
 
@@ -26,7 +26,7 @@ colData(D_ex1)$Sample_ID %>% duplicated() %>% sum()
 data("D_ex2")
 
 # 50 samples and 50 features
-D_ex2 %>% assay() %>% as.data.frame() %>% dim()
+D_ex2 %>% dim()
 # 3 features are duplicated according to COMP_ID
 rowData(D_ex2)$COMP_ID %>% duplicated() %>% sum()
 
