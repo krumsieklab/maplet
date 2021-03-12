@@ -137,7 +137,7 @@ mt_plots_box_scatter <- function(D,
 
   # check x is a column in dataset
   mainvar <- x %>% dplyr::quo_name()
-  if(mainvar %in% dummy == F) stop(glue::glue("No column in plot data frame with name \"{mainvar}\"."))
+  if(mainvar %in% colnames(dummy) == F) stop(glue::glue("No column in plot data frame with name \"{mainvar}\"."))
   
   if(!full_info){
     # filter down only to the variables needed for plotting
