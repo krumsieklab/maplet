@@ -151,7 +151,7 @@ mt_anno_pathways_hmdb <- function(D,
 
 
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf('added pathway annotations using the %s pathway database', pwdb_name)

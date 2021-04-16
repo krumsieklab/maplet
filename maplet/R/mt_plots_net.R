@@ -137,7 +137,7 @@ mt_plots_net <- function(D,
 
   ## add status information & plot
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("Correlation Network, aes: %s", stat_name),

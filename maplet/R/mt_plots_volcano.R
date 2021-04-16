@@ -124,7 +124,7 @@ mt_plots_volcano <- function(D,
 
   ## add status information & plot
   funargs <- maplet:::mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     maplet:::mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("volcano plot, aes: %s", maplet:::mti_dots_to_str(...)),

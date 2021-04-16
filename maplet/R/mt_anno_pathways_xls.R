@@ -168,7 +168,7 @@ mt_anno_pathways_xls <- function(D,
 
 
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf('added pathway annotations using %s', basename(file))

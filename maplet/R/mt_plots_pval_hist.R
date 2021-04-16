@@ -45,7 +45,7 @@ mt_plots_pval_hist <- function(D, stat_list=NULL) {
 
   # add status information & plot
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = glue::glue("P-value histograms for {paste0(stat_list, collapse=', ')}"),

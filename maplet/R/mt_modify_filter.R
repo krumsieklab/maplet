@@ -32,7 +32,7 @@ mt_modify_filter_features <- function(D, filter){
 
     ## add status information & plot
     funargs <- mti_funargs()
-    metadata(D)$results %<>%
+    D %<>% 
                   mti_generate_result(
                       funargs = funargs,
                       logtxt = sprintf("Filter features: %s",  as.character(filter_q)),
@@ -77,7 +77,7 @@ mt_modify_filter_samples <- function(D, filter){
 
     ## add status information & plot
     funargs <- mti_funargs()
-    metadata(D)$results %<>%
+    D %<>% 
                   mti_generate_result(
                       funargs = funargs,
                       logtxt = sprintf("Filter samples: %s",  as.character(filter_q)),

@@ -38,7 +38,7 @@ mt_pre_impute_min <- function(D, verbose=F) {
 
   # add status information
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf('imputed via minimum value, %d features with all NAs, returned as NAs', all_nas)

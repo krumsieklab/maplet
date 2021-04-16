@@ -26,7 +26,7 @@ mt_pre_zero_to_na <- function(D) {
 
   # add status information
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = "zeros replaced by NAs"

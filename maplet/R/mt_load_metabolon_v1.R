@@ -164,7 +164,7 @@ mt_load_metabolon_v1 <- function(D, file, sheet, copy_nan_sheet='') {
 
   # add status information
   funargs <- maplet:::mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     maplet:::mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("loaded Metabolon file: %s, sheet: %s", basename(file), sheet)

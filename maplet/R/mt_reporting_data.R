@@ -24,7 +24,7 @@ mt_reporting_data <- function(D) {
 
   # add status information & plot
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = logtxt

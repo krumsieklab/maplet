@@ -114,7 +114,7 @@ mt_modify_ratios <- function(D, stat_name, edge_filter, neighborhood = 1){
 
     ## add status information & plot
     funargs <- maplet:::mti_funargs()
-    metadata(D)$results %<>%
+    D %<>% 
         maplet:::mti_generate_result(
             funargs = funargs,
             logtxt = sprintf("created %d feature ratios out of %d features", nrow(D), p),

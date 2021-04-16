@@ -10,7 +10,7 @@
 #'
 #' @examples
 #' \dontrun{...  %>%
-#'   mt_settings(list(ggplot_fix=F)) %>% ... # deactivate ggplot fixing
+#'   mt_settings(list(save_all_assays=T)) %>% ... # save assay snapshots
 #'  }
 #'
 #' @author JK
@@ -53,7 +53,7 @@ mt_settings <- function(D, settings) {
 
   # add status information & plot
   funargs <- maplet:::mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     maplet:::mti_generate_result(
       funargs = funargs,
       logtxt = glue::glue("Changes to settings: {log_changes}. Final setting list: {log_final}")
@@ -70,7 +70,8 @@ mt_settings <- function(D, settings) {
 # -> This is where MT developers define the parameters
 mti_settings_list <- function() {
   list(
-    dummy = list(class="numeric", default=5)
+    dummy = list(class="numeric", default=5),
+    save_all_assays = list(class="logical", default=F)
   )
 }
 

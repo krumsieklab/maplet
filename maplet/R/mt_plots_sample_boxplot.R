@@ -73,7 +73,7 @@ mt_plots_sample_boxplot <- function(D,
 
   # add status information & plot
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("sample boxplot, aes: %s", mti_dots_to_str(...)),

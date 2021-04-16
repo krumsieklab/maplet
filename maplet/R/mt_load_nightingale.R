@@ -66,7 +66,7 @@ mt_load_nightingale <- function(D,
 
   # add status information
   funargs <- maplet:::mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     maplet:::mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("loaded Nightingale file: %s, sheet: %s", basename(file), data_sheet)

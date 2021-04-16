@@ -87,7 +87,7 @@ mt_stats_univ_cor <- function(D, stat_name, in_col, method, samp_filter, exact=N
 
   # add status information
   funargs <- maplet:::mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     maplet:::mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("%s correlation to %s", method, in_col),

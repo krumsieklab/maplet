@@ -86,7 +86,7 @@ mt_stats_univ_cs <- function(D,
 
   ## add status information & results
   funargs <- maplet:::mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     maplet:::mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("Composite score analysis, %s", in_col),

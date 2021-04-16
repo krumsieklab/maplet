@@ -67,7 +67,7 @@ mt_post_pgain <- function(D, stat_name, p_col = p.value){
 
     ## add status information & plot
     funargs <- mti_funargs()
-    metadata(D)$results %<>%
+    D %<>% 
                   mti_generate_result(
                       funargs = funargs,
                       logtxt = sprintf("Calculate p-gains for '%s'", stat_name)

@@ -35,7 +35,7 @@ mt_write_se_xls <- function(D, file) {
 
   # add status information
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("Data exported to Excel file '%s'", file)

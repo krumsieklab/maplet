@@ -122,7 +122,7 @@ mt_modify_agg_pathways <- function(D, pw_col, method) {
 
   # add status information
   funargs <- mti_funargs()
-  metadata(newD)$results %<>%
+  newD %<>%
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("pathway aggregation by '%s', %d pathway scores generated", pw_col, nrow(newD))

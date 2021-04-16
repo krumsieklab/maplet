@@ -97,7 +97,7 @@ mt_stats_univ_wilcox <- function(D, in_col, stat_name, samp_filter, paired=F, ex
 
   ## add status information & results
   funargs <- maplet:::mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     maplet:::mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("Wilcox rank sum test, %s", in_col),

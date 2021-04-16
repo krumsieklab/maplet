@@ -103,7 +103,7 @@ mt_pre_confounding_correction_stepaic <- function(D, cols_to_correct, n_cores = 
 
   # add status information
   funargs <- maplet:::mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     maplet:::mti_generate_result(
       funargs = funargs,
       logtxt = sprintf('Adjusted for covariate effects with stepAIC'),

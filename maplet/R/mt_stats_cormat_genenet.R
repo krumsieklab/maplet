@@ -59,7 +59,7 @@ mt_stats_cormat_genenet = function(D, stat_name, samp_filter) {
 
   # add status information
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = 'GeneNet partial correlation',

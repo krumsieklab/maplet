@@ -94,7 +94,7 @@ mt_load_olink <- function(D, file){
 
   # add status information
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("loaded Olink file: %s", basename(file))

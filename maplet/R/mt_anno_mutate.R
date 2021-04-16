@@ -48,7 +48,7 @@ mt_anno_mutate <- function(D, anno_type, col_name, term) {
 
   ## add status information & plot
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("added variable to %s: %s := %s", anno_type, col_name, as.character(x))

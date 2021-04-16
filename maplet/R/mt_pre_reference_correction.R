@@ -56,7 +56,7 @@ mt_pre_reference_correction <- function(D, qc_samples, plate_col){
   assay(D) <- t(X)
   ## add status information
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("Corrected assay data based on NIST samples!")

@@ -133,7 +133,7 @@ mt_plots_heatmap <- function(D,
 
   # add status information & plot
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("Heatmap of assay data."),

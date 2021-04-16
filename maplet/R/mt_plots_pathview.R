@@ -432,7 +432,7 @@ mt_plots_pathview <- function(D,
 
   # add status information & plot
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("%d Pathway images saved in %s", n_pw, path_output),

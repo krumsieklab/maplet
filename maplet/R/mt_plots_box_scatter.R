@@ -269,7 +269,7 @@ mt_plots_box_scatter <- function(D,
 
   ## add status information & plot
   funargs <- maplet:::mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     maplet:::mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("Feature ",ifelse(plot_type=="box", "boxplots", "scatter plots"),", aes: %s", maplet:::mti_dots_to_str(...)),

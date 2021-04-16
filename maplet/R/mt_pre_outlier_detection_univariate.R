@@ -61,7 +61,7 @@ mt_pre_outlier_detection_univariate <- function(D, reduce_dim=F, thresh = 4, per
 
   # add status information
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("flagged %d %s outliers", sum(out, na.rm = TRUE), "univariate"),

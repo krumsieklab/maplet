@@ -109,7 +109,7 @@ mt_stats_univ_lm_matrixeqtl <- function(D, formula, stat_name, samp_filter) {
 
   ## add status information & results
   funargs <- maplet:::mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     maplet:::mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("MatrixEQTL lm, %s", strform),

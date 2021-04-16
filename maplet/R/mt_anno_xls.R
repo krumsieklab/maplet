@@ -123,7 +123,7 @@ mt_anno_xls <-function(D,
 
   # add status information
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = glue::glue("loaded {anno_type} annotations from Excel file '{basename(file)}, sheet '{sheet}'")

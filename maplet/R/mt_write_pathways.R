@@ -94,7 +94,7 @@ mt_write_pathways <- function(D, pw_col, file) {
 
   # add status information
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("Pathway annotations in '%s' exported to Excel file '%s'", pw_col, file)

@@ -161,7 +161,7 @@ mt_plots_equalizer <- function(D1,
 
   # add status information & plot
   funargs <- mti_funargs()
-  metadata(D1)$results %<>%
+  D1 %<>%
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("equalizer plot of '%s' and '%s'", stat1, stat2),

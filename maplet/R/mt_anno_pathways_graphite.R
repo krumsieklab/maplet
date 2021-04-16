@@ -156,7 +156,7 @@ mt_anno_pathways_graphite <- function(D,
 
 
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf('added pathway annotations using the %s database', pwdb_name)

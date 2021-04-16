@@ -25,7 +25,7 @@ mt_write_se_rds <- function(D, file) {
 
   # add status information & plot
   funargs <- maplet:::mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     maplet:::mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("SummarizedExperiment saved to: %s", file)

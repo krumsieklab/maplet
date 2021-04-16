@@ -22,7 +22,7 @@ mt_load_flag_logged <- function(D){
 
   # add status information & plot
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = "Data flagged as logged"

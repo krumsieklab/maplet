@@ -107,7 +107,7 @@ mt_stats_pathway_enrichment <- function(D, stat_name, pw_col, cutoff = 0.05) {
 
 
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("performed pathway enrichment on %s pathways using Fihser's exact test",

@@ -49,7 +49,7 @@ mt_load_checksum <- function(D, file, checksum) {
 
   # add status information
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = logtxt

@@ -49,7 +49,7 @@ mt_pre_trans_relative <- function(D, ref_samples, is_logged) {
 
   # add status information
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = glue::glue('scaled samples relative to {sum(useref)} reference samples: {dplyr::enquo(ref_samples) %>% as.character()}')

@@ -43,7 +43,7 @@ mt_anno_reorder_factor <- function(D, col_name, new_order) {
 
   ## add status information & plot
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("Reordered column '%s' as '%s'", col_name, paste0(new_order,collapse=','))

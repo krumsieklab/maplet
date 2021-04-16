@@ -99,7 +99,7 @@ mti_format_se_samplewise <- function(D){
 #'
 #' Automatically generates fun and args fields, and sends logtxt through logmsg()
 #'
-#' @param lst result list, function should be used like this:  metadata(D)$results %<>% mti_generate_result(...)
+#' @param D \code{SummarizedExperiment} input
 #' @param funargs output from mti_funargs() that should be collected by calling function
 #' @param logtxt log text describing what the function did
 #' @param output output structure of that function (e.g. plot, statistical results)... default is NULL (i.e. no output)
@@ -109,32 +109,86 @@ mti_format_se_samplewise <- function(D){
 #'
 #' @noRd
 mti_generate_result <- function(
-  lst,              #
-  funargs,          #
-  logtxt="",        #
-  output=NULL,      #
-  output2=NULL     #
+  D,
+  funargs,
+  logtxt="",
+  output=NULL,
+  output2=NULL
 ) {
-
+  
   # ensure structure of funargs
   stopifnot("fun" %in% names(funargs))
   stopifnot("args" %in% names(funargs))
 
   this.uuid = uuid::UUIDgenerate()
-
+  # check if assay updated
+  save_assays = mti_get_setting(D, "save_all_assays")
+  if(save_assays){
+    if(assays(D) %>% length() != 0){
+      metadata(D)$assays %<>% mti_assay_ptr(res_assay=assay(D))
+      assay_ptr <- metadata(D)$assays$head_ptr
+    }else{
+      assay_ptr <- NULL
+    }
+  }else{
+    assay_ptr <- NULL
+  }
+  
   # assemble list
-  mti_add_to_list(
-    lst,
+  metadata(D)$results %<>% mti_add_to_list(
     list(
       fun=funargs$fun,
       args=funargs$args,
       logtxt=mti_logmsg(logtxt),
       uuid=this.uuid,
       output=output,
-      output2=output2
+      output2=output2,
+      assay_ptr=assay_ptr
     ),
     oname = paste(paste(funargs$fun,collapse = "_"), this.uuid, sep = ".")
   )
+  
+  D
+}
+
+
+#' Return pointer to current assay
+#' 
+#' Checks whether assay has been updated. If true, adds new assay to $results$assay and assigns new head_assay and returns new 
+#' pointer. Else, returns pointer to current head_assay.
+#' 
+#' @param assays List containing $head_ptr (pointer to current version of assay) and assay_lst (list of all versions of assay).
+#' @param res_assays Current assay data frame from latest function call.
+#' 
+#' @return assays List with updated $head_ptr and assay_lst (if assay changed).
+#' 
+#' @noRd
+mti_assay_ptr <- function(assays, res_assay){
+  
+  if(is.null(assays)) assays <- list(head_ptr=NULL, assay_lst=list())
+  
+  a_uuid = uuid::UUIDgenerate()
+  
+  # no head, add current assay and update pointer
+  if(is.null(assays$head_ptr) && !is.null(res_assay)){
+    assay_ptr <- paste0("assay.", a_uuid)
+    assays$assay_lst[[assay_ptr]] <- res_assay
+    assays$head_ptr <- assay_ptr
+  }else{
+    # get head_assay and compare to res_assay
+    head_assay <- assays$assay_lst[[assays$head_ptr]]
+    assay_changed <- !identical(head_assay, res_assay)
+    
+    # if assay changed, add to list and update
+    if(assay_changed){
+      assay_ptr <- paste0("assay.", a_uuid)
+      assays$assay_lst[[assay_ptr]] <- res_assay
+      assays$head_ptr <- assay_ptr
+    }
+  }
+  
+  assays
+  
 }
 
 

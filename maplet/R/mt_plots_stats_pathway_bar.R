@@ -346,7 +346,7 @@ mt_plots_stats_pathway_bar <- function(D,
 
   ## add status information & plot
   funargs <- maplet:::mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     maplet:::mti_generate_result(
       funargs = funargs,
       logtxt = ifelse(exists("stat_list"), sprintf("bar plot for comparison %s, by %s, filtered for %s, using %s", paste(stat_list,collapse = ", "), group_col, gsub("~", "", rlang::expr_text(enquo(feat_filter))), y_scale),

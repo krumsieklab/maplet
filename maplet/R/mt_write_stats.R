@@ -71,7 +71,7 @@ mt_write_stats <- function(D, file, stat_list=NULL, sort_by_p=F, feat_col=NULL) 
 
   # add status information
   funargs <- maplet:::mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     maplet:::mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("Exported sheets '%s' to Excel file '%s'",

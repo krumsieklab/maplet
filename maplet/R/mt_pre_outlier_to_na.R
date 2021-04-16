@@ -59,7 +59,7 @@ mt_pre_outlier_to_na <- function(
   assay(D)[t(H)] <- NA
   # add status information
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("flagged %d outliers", sum(H))

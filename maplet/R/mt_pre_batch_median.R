@@ -79,7 +79,7 @@ mt_pre_batch_median = function(D, batch_col, ref_samples) {
 
   # add status information
   funargs <- maplet:::mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     maplet:::mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("median-scaling per batch in '%s', based on %d reference samples%s",batch_col,sum(use_samples),refadd)

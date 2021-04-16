@@ -78,7 +78,7 @@ mt_plots_dilution_factor <- function(D,
 
   # add status information & plot
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("dilution factor plot, '%s'",in_col),

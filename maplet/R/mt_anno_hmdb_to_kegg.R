@@ -81,7 +81,7 @@ mt_anno_hmdb_to_kegg <- function(D, in_col, out_col = "KEGG") {
 
   # add status information
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("loaded KEGG annotations for %i out of %i metabolites", length(newdf[[out_col]][!is.na(newdf[[out_col]])]), length(newdf[[out_col]]))

@@ -89,7 +89,7 @@ mt_anno_pathways_remove_redundant <- function(D, feat_col, pw_col ) {
   metadata(D)$pathways[[pw_col]] <- pwdb_summary_replacement
 
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf('removed redundant pathway annotations using the %s column', pw_col)

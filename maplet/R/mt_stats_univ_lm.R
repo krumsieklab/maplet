@@ -246,7 +246,7 @@ mt_stats_univ_lm <- function(D,
 
   ## add status information & results
   funargs <- maplet:::mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     maplet:::mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("univariate lm, %s", as.character(formula)),

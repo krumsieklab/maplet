@@ -52,7 +52,7 @@ mt_pre_batch_combat = function(D, batch_col) {
 
   # add status information
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("ComBat batch correction, variable: '%s'",batch_col)

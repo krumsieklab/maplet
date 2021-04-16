@@ -88,7 +88,7 @@ mt_pre_confounding_correction <- function(D, formula, strata = NULL, scale_data 
 
   # add status information
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("covariates adjustment: '%s'", as.character(formula)),

@@ -28,7 +28,7 @@ mt_reporting_tic <- function(D) {
   tic()
   # add status information & plot
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("tic")
@@ -74,7 +74,7 @@ mt_reporting_toc <- function(D) {
   }
   # add status information & plot
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = logtxt

@@ -58,7 +58,7 @@ mt_pre_trans_scale <- function(D, center_data=T, scale_data=T, ref_samples) {
 
   # add status information
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf('scaled, center=%d, scale=%d', center_data, scale_data)

@@ -43,7 +43,7 @@ mt_modify_avg_features <- function(D, group_col) {
 
   ## add status information
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf('%d duplicate features averaged', (total_rows-length(unique_rows)))

@@ -31,7 +31,7 @@ mt_plots_pval_qq <- function(D, stat_name) {
 
   # add status information & plot
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = glue::glue("P-value QQ plot for {paste0(stat_name, collapse=', ')}"),

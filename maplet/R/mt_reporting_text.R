@@ -26,7 +26,7 @@ mt_reporting_text <- function(D, text){
 
   # add status information & heading info
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = glue::glue("reporting text"),

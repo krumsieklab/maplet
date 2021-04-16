@@ -82,7 +82,7 @@ mt_pre_norm_quot <- function(D,
 
   # add status information
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = glue::glue('quotient normalization based on {sum(useref)} reference samples and {length(vars)} variables: {dplyr::enquo(ref_samples) %>% as.character()}'),

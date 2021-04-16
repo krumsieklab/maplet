@@ -179,7 +179,7 @@ mt_load_metabolon_lipidomics <- function(D, file, sheet_list) {
 
   # add status information
   funargs <- maplet:::mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     maplet:::mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("loaded Metabolon lipidomics file: %s, sheets: %s", basename(file), paste(sheet_list, collapse = ", "))

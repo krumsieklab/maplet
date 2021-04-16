@@ -125,7 +125,7 @@ mt_load_ucd <- function(D, file, sheet, zero_to_na=T, gen_valid_varnames=F) {
 
   # add status information
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("loaded UCD file: '%s', sheet: %s", basename(file), sheet)

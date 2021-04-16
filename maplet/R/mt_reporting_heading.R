@@ -32,7 +32,7 @@ mt_reporting_heading <- function(D, heading, lvl=1) {
 
   # add status information & heading info
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = glue::glue("reporting heading, level {lvl}: {heading}"),

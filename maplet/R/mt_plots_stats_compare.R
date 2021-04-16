@@ -146,7 +146,7 @@ mt_plots_stats_compare <- function(D1,
   if (!return_plot_only) {
     ## add status information & plot
     funargs <- maplet:::mti_funargs()
-    metadata(D1)$results %<>%
+    D1 %<>%
       maplet::: mti_generate_result(
         funargs = funargs,
         logtxt = sprintf("comparison plot between '%s' and '%s'", stat1, stat2),

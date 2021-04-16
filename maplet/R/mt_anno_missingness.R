@@ -61,7 +61,7 @@ mt_anno_missingness <- function(D, anno_type, out_col="missingness"){
 
   # add status information
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = logtxt

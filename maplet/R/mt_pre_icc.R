@@ -82,7 +82,7 @@ mt_pre_icc <- function(D, qc_samples, out_col, id_col, icc_lmer=F){
 
   ## add status information
   funargs <- maplet:::mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     maplet:::mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("Added QC ICC to rowData!")

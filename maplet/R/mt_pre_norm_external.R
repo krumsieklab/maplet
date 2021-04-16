@@ -33,7 +33,7 @@ mt_pre_norm_external = function(D, col_name) {
 
   # add status information
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = glue::glue("normalized by '{col_name}'")

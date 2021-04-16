@@ -74,7 +74,7 @@ mt_modify_diff_groups <- function(D, id_col, group_col, grp1, grp2) {
 
   # add status information
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = glue('created new dataset, id var: {id_col}, subtracting {group_col}, group {grp2}{opstr}{grp1}')

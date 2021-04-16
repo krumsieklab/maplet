@@ -108,7 +108,7 @@ mt_anno_pathways_uniprot <- function(D, in_col, out_col, raw_db_outfile) {
 
 
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = 'added pathway annotations using the KEGG pathway database'

@@ -92,7 +92,7 @@ mt_plots_umap <- function(D,
 
   # add status information & plot
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("UMAP, label_col: %s, aes: %s", label_col,  mti_dots_to_str(...)),

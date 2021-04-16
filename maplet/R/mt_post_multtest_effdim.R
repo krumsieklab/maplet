@@ -52,7 +52,7 @@ mt_post_multtest_effdim <- function(D,
 
   ## add status information & plot
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("Multiple testing correction of '%s' using effective dimension method", stat_name)

@@ -37,7 +37,7 @@ mt_modify_avg_samples <- function(D, group_col) {
 
   ## add status information
   funargs <- maplet:::mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     maplet:::mti_generate_result(
       funargs = funargs,
       logtxt = sprintf(' %d duplicate samples combined', length(to_remove))

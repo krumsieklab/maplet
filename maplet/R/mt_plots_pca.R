@@ -136,7 +136,7 @@ mt_plots_pca <- function(D,
 
   # add status information & plot
   funargs <- mti_funargs()
-  metadata(D)$results %<>%
+  D %<>% 
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("PCA, %s, label_col: %s, aes: %s", data_type, label_col,  mti_dots_to_str(...)),
