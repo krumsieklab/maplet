@@ -29,12 +29,11 @@ mt_load_metabolon_v2 <- function(D, file, data_sheet, met_sheet, samp_sheet) {
   result <- list()
 
   # validate arguments
-  if (missing(file)) stop("file must be provided")
-  if (missing(sheet_list)) stop("sheet must be provided")
-
-  # save input information
-  result$info$file <- file
-  result$info$sheet <- paste(sheet_list, collapse = ", ")
+  if (missing(file)) stop("file must be provided.")
+  if (missing(data_sheet)) stop("sheet must be provided.")
+  if (missing(met_sheet)) stop("met_sheet must be provided.")
+  if (missing(samp_sheet)) stop("samp_sheet must be provided.")
+  
 
   # get metadata from D if present
   if(!missing(D)){
