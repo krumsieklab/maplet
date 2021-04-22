@@ -20,7 +20,7 @@ Call without parameters to show current settings. Call with list of parameters t
 }
 \examples{
 \dontrun{...  \%>\%
-  mt_settings(list(ggplot_fix=F)) \%>\% ... # deactivate ggplot fixing
+  mt_settings(list(save_all_assays=T)) \%>\% ... # save assay snapshots
  }
 
 }

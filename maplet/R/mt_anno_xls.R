@@ -36,6 +36,8 @@
 #'
 #' @author JK
 #'
+#' @import tidyverse
+#'
 #' @export
 mt_anno_xls <-function(D,
                        file,
@@ -49,18 +51,24 @@ mt_anno_xls <-function(D,
   # validate arguments
   stopifnot("SummarizedExperiment" %in% class(D))
   if (!(anno_type %in% c("samples","features"))) stop("anno_type must be either 'samples' or 'features'")
-
+  atype_str <- ifelse(anno_type=="samples", "sample", "feature")
+  
   # load excel sheet
   df <- as.data.frame(readxl::read_excel(path=file,sheet=sheet,col_names=T))
-  # ensure that sample ID column exists
-  if (!(anno_id_col %in% colnames(df))) stop(glue::glue("sample ID column '{anno_id_col}' does not exist in '{basename(file)}, sheet '{sheet}'"))
-  if (any(is.na(df[[anno_id_col]]))) stop(glue::glue("sample ID column '{anno_id_col}' contains empty cells, '{basename(file)}, sheet '{sheet}'"))
+  
+  # ensure that annotation ID column exists and contains no empty cells
+  if (!(anno_id_col %in% colnames(df))) stop(glue::glue("{atype_str} ID column '{anno_id_col}' does not exist in '{basename(file)}, sheet '{sheet}'"))
+  if (any(is.na(df[[anno_id_col]]))) stop(glue::glue("{atype_str} ID column '{anno_id_col}' contains empty cells, '{basename(file)}, sheet '{sheet}'"))
   rownames(df) <- make.names(df[[anno_id_col]], unique=T)
-
+  
   # slightly different behavior for samples or features
   if (anno_type=="samples") {
     # ensure the data_id_col column exists
     if (!(data_id_col %in% colnames(colData(D)))) stop(glue::glue("ID column '{data_id_col}' does not exist in current sample annotations of SE"))
+    # ensure no columns in annotation df already exist in colData
+    anno_col_names <- df %>% select(-one_of(anno_id_col)) %>% colnames()
+    data_col_names <- colData(D) %>% as.data.frame() %>% select(-one_of(data_id_col)) %>% colnames()
+    if(any(anno_col_names %in% data_col_names)) stop("Annotation column names already exist in colData.")
     # check that all samples are found in the colnames of the existing dataset
     m <- match(df[[anno_id_col]], colData(D)[[data_id_col]])
     if (any(is.na(m))) {
@@ -68,6 +76,8 @@ mt_anno_xls <-function(D,
       if (no_map_err) stop(msg)
       # else warning(msg)
     }
+    # check no annotations are duplicated
+    if(any(duplicated(df[!is.na(m),anno_id_col]))) stop(glue::glue("The ID column '{anno_id_col}' of the annotation data frame contains duplicated values."))
     # make everything a string
     df[[anno_id_col]] %<>% as.character()
     colData(D)[[data_id_col]] %<>% as.character()
@@ -89,6 +99,10 @@ mt_anno_xls <-function(D,
   } else if (anno_type=="features") {
     # ensure the data_id_col column exists
     if (!(data_id_col %in% colnames(rowData(D)))) stop(glue::glue("ID column '{data_id_col}' does not exist in current feature annotations of SE"))
+    # ensure no columns in annotation df already exist in rowData
+    anno_col_names <- df %>% select(-one_of(anno_id_col)) %>% colnames()
+    data_col_names <- rowData(D) %>% as.data.frame() %>% select(-one_of(data_id_col)) %>% colnames()
+    if(any(anno_col_names %in% data_col_names)) stop("Annotation column names already exist in rowData.")
     # check that all features are found in the $name column of the existing dataset
     m <- match(df[[anno_id_col]], rowData(D)[[data_id_col]])
     if (any(is.na(m))) {
@@ -96,6 +110,8 @@ mt_anno_xls <-function(D,
       if (no_map_err) stop(msg)
       # else warning(msg)
     }
+    # check no annotations are duplicated
+    if(any(duplicated(df[!is.na(m),anno_id_col]))) stop(glue::glue("The ID column '{anno_id_col}' of the annotation data frame contains duplicated values."))
     # make everything a string
     df[[anno_id_col]] %<>% as.character()
     rowData(D)[[data_id_col]] %<>% as.character()
