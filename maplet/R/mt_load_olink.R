@@ -38,10 +38,7 @@ mt_load_olink <- function(D, file){
 
   # validate arguments
   if (missing(file)) stop("file must be provided")
-
-  # save input information
-  result$info$file <- file
-
+  
   # get metadata from D if present
   if(!missing(D)){
     # validate SE
@@ -74,7 +71,7 @@ mt_load_olink <- function(D, file){
                                                Panel_Version = reshape2::dcast(odata,formula = " SampleID ~ OlinkID", value.var = "Panel_Version")[1,-1] %>% unlist() %>% unname(),
                                                PlateID = reshape2::dcast(odata,formula = " SampleID ~ OlinkID", value.var = "PlateID")[1,-1] %>% unlist() %>% unname()
                            ),
-                           metadata = list(sessionInfo=utils::sessionInfo(), parseInfo=result$info))
+                           metadata = list(sessionInfo=utils::sessionInfo()))
 
   # add original metadata if exists
   if (!is.null(result$meta$results)) metadata(D)$results <- result$meta$results

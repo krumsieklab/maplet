@@ -70,12 +70,6 @@ mt_load_metabolon_v2 <- function(D, file, data_sheet, met_sheet, samp_sheet) {
     rownames(result$data) = c()
   }
 
-  # set info flags
-  result$info$file = file
-  result$info$data_sheet = data_sheet
-  result$info$met_sheet = met_sheet
-  result$info$samp_sheet = samp_sheet
-
   # return SummarizedExperiment
 
   # add display name
@@ -86,7 +80,7 @@ mt_load_metabolon_v2 <- function(D, file, data_sheet, met_sheet, samp_sheet) {
   D <- SummarizedExperiment(assay    = t(result$data),
                        colData  = result$sampleinfo,
                        rowData  = result$metinfo,
-                       metadata = list(sessionInfo=utils::sessionInfo(), parseInfo=result$info))
+                       metadata = list(sessionInfo=utils::sessionInfo()))
 
   # add original metadata if exists
   if (!is.null(result$meta$results)) metadata(D)$results <- result$meta$results

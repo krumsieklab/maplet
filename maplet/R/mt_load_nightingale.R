@@ -129,13 +129,6 @@ load_multiple_sheet_format <- function(file,
     mutate_all(as.matrix) %>% mutate_all(as.numeric)
   result$data <- data.frame(raw_data)
 
-  # set info flags
-  result$info$file <- file
-  result$info$data_sheet <- data_sheet
-  result$info$met_sheet <- met_sheet
-  result$info$met_qc_sheet <- met_qc_sheet
-  result$info$samp_qc_sheet <- samp_qc_sheet
-
   # add display name
   result$metinfo$name   <- result$metinfo$Excel_column_name
   # fix variable names
@@ -144,7 +137,7 @@ load_multiple_sheet_format <- function(file,
   D <- SummarizedExperiment(assay    = t(result$data),
                             colData  = result$sampleinfo,
                             rowData  = result$metinfo,
-                            metadata = list(sessionInfo=utils::sessionInfo(), parseInfo=result$info))
+                            metadata = list(sessionInfo=utils::sessionInfo()))
 
   # ensure colnames and rownames exist
   if (is.null(colnames(D))) colnames(D) <- 1:ncol(D)
@@ -183,15 +176,13 @@ load_single_sheet_format <- function (file=file,
     mutate_all(as.matrix) %>% mutate_all(as.numeric)
   result$data <- data.frame(raw_data)
 
-  # set info flags
-  result$info$file <- file
   # fix variable names
   colnames(result$data) <- result$metinfo$name
   # generate summarized experiment
   D <- SummarizedExperiment(assay    = t(result$data),
                             colData  = result$sampleinfo,
                             rowData  = result$metinfo,
-                            metadata = list(sessionInfo=utils::sessionInfo(), parseInfo=result$info))
+                            metadata = list(sessionInfo=utils::sessionInfo()))
 
   # ensure colnames and rownames exist
   if (is.null(colnames(D))) colnames(D) <- 1:ncol(D)

@@ -30,10 +30,6 @@ mt_load_metabolon_v1 <- function(D, file, sheet, copy_nan_sheet='') {
   if (missing(file)) stop("file must be provided")
   if (missing(sheet)) stop("sheet must be provided")
 
-  # save input information
-  result$info$file <- file
-  result$info$sheet <- sheet
-
   # get metadata from D if present
   if(!missing(D)){
     # validate SE
@@ -50,10 +46,6 @@ mt_load_metabolon_v1 <- function(D, file, sheet, copy_nan_sheet='') {
   # validate arguments
   if (missing(file)) stop("file must be provided")
   if (missing(sheet)) stop("sheet must be provided")
-
-  # save input information
-  result$info$file <- file
-  result$info$sheet <- sheet
 
   # get metadata from D if present
   if(!missing(D)){
@@ -135,8 +127,6 @@ mt_load_metabolon_v1 <- function(D, file, sheet, copy_nan_sheet='') {
       stop('some sample names are different between data sheet and NaN sheet');
     # copy over NaNs
     result$data[is.na(nandf$data)]=NA
-    # set info flag
-    result$info$copy_nan_sheet = copy_nan_sheet
 
   }
 
@@ -151,7 +141,7 @@ mt_load_metabolon_v1 <- function(D, file, sheet, copy_nan_sheet='') {
   D <- SummarizedExperiment(assay    = t(result$data),
                             colData  = result$sampleinfo,
                             rowData  = result$metinfo,
-                            metadata = list(sessionInfo=utils::sessionInfo(), parseInfo=result$info))
+                            metadata = list(sessionInfo=utils::sessionInfo()))
 
   # add original metadata if exists
   if (!is.null(result$meta$results)) metadata(D)$results <- result$meta$results

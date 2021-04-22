@@ -32,10 +32,6 @@ mt_load_metabolon_lipidomics <- function(D, file, sheet_list) {
   if (missing(file)) stop("file must be provided")
   if (missing(sheet_list)) stop("sheet must be provided")
 
-  # save input information
-  result$info$file <- file
-  result$info$sheet <- paste(sheet_list, collapse = ", ")
-
   # get metadata from D if present
   if(!missing(D)){
     # validate SE
@@ -113,10 +109,6 @@ mt_load_metabolon_lipidomics <- function(D, file, sheet_list) {
     # adding variable for matching later on
     result$sampleinfo$id = rownames(result$data)
 
-    # set info flags
-    result$info$file = file
-    result$info$sheet = x
-
     # add display name
     result$metinfo$name <- result$metinfo$Name
 
@@ -171,7 +163,7 @@ mt_load_metabolon_lipidomics <- function(D, file, sheet_list) {
   D <- SummarizedExperiment(assay    = t(result$data),
                             colData  = result$sampleinfo,
                             rowData  = result$metinfo,
-                            metadata = list(sessionInfo=utils::sessionInfo(), parseInfo=result$info))
+                            metadata = list(sessionInfo=utils::sessionInfo()))
 
   # add original metadata if exists
   if (!is.null(result$meta$results)) metadata(D)$results <- result$meta$results

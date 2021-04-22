@@ -28,10 +28,6 @@ mt_load_wcm <- function(D, file, sheet, zero_to_na=T){
   if (missing(file)) stop("file must be provided")
   if (missing(sheet)) stop("sheet must be provided")
 
-  # save input information
-  result$info$file <- file
-  result$info$sheet <- paste(sheet, collapse = ", ")
-
   # get metadata from D if present
   if(!missing(D)){
     # validate SE
@@ -61,7 +57,7 @@ mt_load_wcm <- function(D, file, sheet, zero_to_na=T){
   D <- SummarizedExperiment(assay    = as.matrix(raw),
                             rowData  = metinfo,
                             colData  = data.frame(ID=colnames(raw)),
-                            metadata = list(sessionInfo=utils::sessionInfo(), parseInfo=result$info))
+                            metadata = list(sessionInfo=utils::sessionInfo()))
 
   # add original metadata if exists
   if (!is.null(result$meta$results)) metadata(D)$results <- result$meta$results

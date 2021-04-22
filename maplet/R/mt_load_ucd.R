@@ -29,10 +29,6 @@ mt_load_ucd <- function(D, file, sheet, zero_to_na=T, gen_valid_varnames=F) {
   if (missing(file)) stop("file must be provided")
   if (missing(sheet)) stop("sheet must be provided")
 
-  # save input information
-  result$info$file <- file
-  result$info$sheet <- sheet
-
   # get metadata from D if present
   if(!missing(D)){
     # validate SE
@@ -49,10 +45,6 @@ mt_load_ucd <- function(D, file, sheet, zero_to_na=T, gen_valid_varnames=F) {
   # validate arguments
   if (missing(file)) stop("file must be provided")
   if (missing(sheet)) stop("sheet must be provided")
-
-  # save input information
-  result$info$file <- file
-  result$info$sheet <- sheet
 
   # get metadata from D if present
   if(!missing(D)){
@@ -117,7 +109,7 @@ mt_load_ucd <- function(D, file, sheet, zero_to_na=T, gen_valid_varnames=F) {
   D <- SummarizedExperiment(assay    = t(result$data),
                             colData  = result$sampleinfo %>% as.data.frame(),
                             rowData  = result$metinfo %>% as.data.frame(),
-                            metadata = list(sessionInfo=utils::sessionInfo(), parseInfo=result$info))
+                            metadata = list(sessionInfo=utils::sessionInfo()))
 
   # add original metadata if exists
   if (!is.null(result$meta$results)) metadata(D)$results <- result$meta$results
