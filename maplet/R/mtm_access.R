@@ -49,6 +49,7 @@ mtm_res_get_entries <- function(D,name_list) {
 #' @param fullstruct optional, output entire $output structure, not just the $table inside.
 #'
 #' @return $output$table dataframe
+#' 
 #' @export
 mtm_get_stat_by_name <- function(D, name, fullstruct=F){
   stopifnot("SummarizedExperiment" %in% class(D))
@@ -84,10 +85,12 @@ mtm_get_stat_by_name <- function(D, name, fullstruct=F){
 
 #' Extract all plot objects from pipeline
 #'
-#' Differs from mtm_res_get_plots_entries in that that function extracts full result structures, and this one returns just the plots
+#' Returns just the plots, either retaining the results structure (a nested list) or unlisted.
 #'
-#' @param D SummarizedExperiment
-#' @param unlist Unlist all plots into one long list (default: T)
+#' @param D \code{SummarizedExperiment} input.
+#' @param unlist Unlist all plots into one long list. Default: T.
+#'
+#' @return A list (nested or unlisted) containing all plots.
 #'
 #' @export
 mtm_res_get_plots <- function(D,unlist=T){
@@ -95,6 +98,7 @@ mtm_res_get_plots <- function(D,unlist=T){
   if(unlist) l <- unlist(l,recursive=F)
   l
 }
+
 
 #' Plot all plots from a pipeline
 #'
@@ -104,7 +108,8 @@ mtm_res_get_plots <- function(D,unlist=T){
 #' @param input List of plots or SummarizedExperiment
 #' @param dev Device to plot to (default: PDF)
 #' @param ... Further paramaters to be passed to dev() function.
-#'
+#' 
+#' @return None
 #'
 #' @export
 mtm_plot_all_tofile <- function(input, dev=pdf, ...) {
@@ -118,3 +123,131 @@ mtm_plot_all_tofile <- function(input, dev=pdf, ...) {
   dev.off()
 }
 
+
+#' Extract all UUIDs for each function call
+#' 
+#' Extracts all of the UUIDs for each function call and returns a data frame with each function call and corresponding UUID.
+#' 
+#' @param D \code{SummarizedExperiment} input.
+#' 
+#' @return A data frame with three columns: (1) call_order, (2) function_calls, (3) UUIDs.
+#' 
+#' @export
+mtm_res_get_uuids <- function(D){
+  
+  # validate arguments
+  stopifnot("SummarizedExperiment" %in% class(D))
+  
+  # extract function names and uuids
+  fun_calls <- metadata(D)$results %>% names()
+  calls <- sapply(fun_calls, function(x){x %>% strsplit("\\.") %>% unlist() %>% extract2(1)})
+  uuids <- sapply(fun_calls, function(x){x %>% strsplit("\\.") %>% unlist() %>% extract2(2)})
+  
+  # combine into data frame
+  fun_uuid_df <- data.frame(call_order = 1:length(calls), function_calls = calls, UUIDs = uuids)
+  
+  fun_uuid_df
+}
+
+
+#' Extract all assay pointers for each function call
+#' 
+#' Extracts all assay pointers for each function call and returns a data frame with each function call and corresponding 
+#' assay pointer. The assay pointer is an identifier used to determine which assay version was used with a particular function
+#' call. Will be NULL for all values if the global setting save_all_assays is FALSE.
+#'  
+#' @param D \code{SummarizedExperiment} input.
+#'  
+#' @return A data frame with two columns: (1) call_order, (2) function_calls, (3) assay_ptrs.
+#'   
+#' @export 
+mtm_res_get_ptrs <- function(){
+  
+  # validate arguments
+  stopifnot("SummarizedExperiment" %in% class(D))
+  
+  # extract function names
+  res <- metadata(D)$results
+  fun_calls <- res %>% names()
+  calls <- sapply(fun_calls, function(x){x %>% strsplit("\\.") %>% unlist() %>% extract2(1)})
+  
+  # extract assay pointers
+  tmp_assay_ptrs <- sapply(1:length(res), function(i){res[[i]]$assay_ptr})
+  # fix NULL values and unlist
+  assay_ptrs <- sapply(tmp_assay_ptrs, function(x){ifelse(is.null(x), NA, x)})
+  
+  # combine into data frame
+  assay_ptr_df <- data.frame(call_order = 1:length(calls), function_calls = calls, assay_ptrs=assay_ptrs)
+  
+  assay_ptr_df
+  
+}
+
+#' Return a specific assay version given a UUID or tag name
+#' 
+#' Returns an assay version associated with a specific function call identified by the UUID or a tag name.
+#' 
+#' @param D \code{SummarizedExperiment} input.
+#' @param uuid A UUID associated with a specific function call.
+#' @param tag_name Name of a tag given to a section of a maplet pipeline.
+#' 
+#' @return An assay data frame.
+#' 
+#' @export
+mtm_get_assay_by_id <- function(D, uuid, tag_name){
+  
+  # validate arguments
+  stopifnot("SummarizedExperiment" %in% class(D))
+  
+  if(missing(uuid) & missing(tag_name)) stop("Must provide a value for either uuid or tag name.")
+  if(!missing(uuid) & !missing(tag_name)) stop("Only one of these arguments can be passed at a time: uuid, tag_name.")
+  
+  if(!missing(tag_name)){
+    # check tag name exists
+    tag_name_list <- maplet::mtm_res_get_entries(D, c("reporting", "tag")) %>% purrr::map("output") %>% unlist()
+    tag_name_idx <- match(tag_name, tag_name_list)
+    if(is.na(tag_name_idx)) stop(glue::glue("The tag \'{tag_name}\' was not found."))
+    
+    # get function call
+    fun_call <- names(tag_name_list[tag_name_idx])
+    
+  }else{
+    # check uuid exists
+    uuid_df <- mtm_res_get_uuids(D)
+    if(uuid %in% uuid_df$UUIDs == F) stop(glue::glue("Value for uuid \'{uuid}\' not found in metadata $results list."))
+    
+    # get function call
+    fun_call <- rownames(uuid_df[uuid_df$UUIDs==uuid,])
+    
+  }
+  
+  #extract assay version
+  assay_ptr <- metadata(D)$results[[fun_call]]$assay_ptr
+  assay <- metadata(D)$assays$assay_lst[[assay_ptr]]
+  
+  assay
+  
+}
+
+#' Return a specific assay version given an assay pointer
+#' 
+#' Returns an assay version identified by a specific assay pointer.
+#' 
+#' @param D \code{SummarizedExperiment} input.
+#' @param ptr A string used to identify assay versions.
+#' 
+#' @return An assay data frame.
+#' 
+#' @export
+mtm_get_assay_by_ptr <- function(D, ptr){
+  
+  # check assay pointer exists
+  all_assay_ptrs <- metadata(D)$assays$assay_lst %>% names()
+  if(ptr %in% all_assay_ptrs == F) stop(glue::glue("Value for ptr {ptr} not found in metadata $assays list."))
+  
+  # extract assay version
+  assay <- metadata(D)$assays$assay_lst[[ptr]]
+  
+  assay
+  
+}

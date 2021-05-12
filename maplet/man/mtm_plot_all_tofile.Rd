@@ -13,6 +13,9 @@ mtm_plot_all_tofile(input, dev = pdf, ...)
 
 \item{...}{Further paramaters to be passed to dev() function.}
 }
+\value{
+None
+}
 \description{
 Opens a device (default: PDF), plots all plots, closes device.
 Works either on list of plots, or on SE

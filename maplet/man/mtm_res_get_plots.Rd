@@ -7,10 +7,13 @@
 mtm_res_get_plots(D, unlist = T)
 }
 \arguments{
-\item{D}{SummarizedExperiment}
+\item{D}{\code{SummarizedExperiment} input.}
 
-\item{unlist}{Unlist all plots into one long list (default: T)}
+\item{unlist}{Unlist all plots into one long list. Default: T.}
+}
+\value{
+A list (nested or unlisted) containing all plots.
 }
 \description{
-Differs from mtm_res_get_plots_entries in that that function extracts full result structures, and this one returns just the plots
+Returns just the plots, either retaining the results structure (a nested list) or unlisted.
 }
