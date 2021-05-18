@@ -19,12 +19,12 @@ devtools::install_github(repo="krumsieklab/maplet", subdir="maplet")
 ## Getting Started
 Users should review the available examples in the [maplet/examples](/examples) folder. A large example pipeline demonstrating the general setup of a maplet pipeline and most of the functions provided by maplet is provided [here](/examples/example_pipeline.R). The mt/example folder also contains several stand-alone examples for more specialized functions not included in the main example.  
   
-Users are also encouraged to review the maplet Reference Guide sections 1 and 2.
+Users are also encouraged to review the [maplet Reference Guide](/guide/maplet_Reference_Guide_markdown.md) sections 1 and 2.
 
 ## Want to Get Involved?
-Anyone is welcome to contribute to the maplet R package. For users wishing to contribute a new function, we recommend first reviewing the code and documentation of a few existing functions. We also recommend reviewing section 3 of the maplet Reference Guide.  
+Anyone is welcome to contribute to the maplet R package. For users wishing to contribute a new function, we recommend first reviewing the code and documentation of a few existing functions. We also recommend reviewing section 3 of the [maplet Reference Guide](/guide/maplet_Reference_Guide_markdown.md).  
 
-**Note**: maplet functions follow strict naming conventions (refer to section 3.2.1 of the maplet Reference Guide for details). A submitted function may initially be rejected if it does not follow the function naming rules. If you have questions about naming and function development, we recommend reaching out to the maintainer, [Kelsey Chetnik](https://krumsieklab.org/).
+**Note**: maplet functions follow strict naming conventions (refer to section 3.2.1 of the [maplet Reference Guide](/guide/maplet_Reference_Guide_markdown.md) for details). A submitted function may initially be rejected if it does not follow the function naming rules. If you have questions about naming and function development, we recommend reaching out to the maintainer, [Kelsey Chetnik](https://krumsieklab.org/).
 
 ## Core Contributors
 The following people have made significant contributions to the development of maplet:  
