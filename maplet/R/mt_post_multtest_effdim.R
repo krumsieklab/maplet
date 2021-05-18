@@ -55,7 +55,8 @@ mt_post_multtest_effdim <- function(D,
   D %<>% 
     mti_generate_result(
       funargs = funargs,
-      logtxt = sprintf("Multiple testing correction of '%s' using effective dimension method", stat_name)
+      logtxt = sprintf("Multiple testing correction of '%s' using effective dimension method", stat_name),
+      output = list(effdim = effdim)
     )
 
   ## RETURN
