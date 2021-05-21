@@ -161,7 +161,7 @@ mtm_res_get_uuids <- function(D){
 #' @return A data frame with two columns: (1) call_order, (2) function_calls, (3) assay_ptrs.
 #'   
 #' @export 
-mtm_res_get_ptrs <- function(){
+mtm_res_get_ptrs <- function(D){
   
   # validate arguments
   stopifnot("SummarizedExperiment" %in% class(D))

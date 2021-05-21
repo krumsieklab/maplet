@@ -1,7 +1,7 @@
 # ------------ maplet Example Pipeline ------------
 # This example pipeline demonstrates the use of 79 of the 86 functions available from maplet.
 # Users can use `?` to find additional information on each function. Users can also review the User Manual available on
-# {GITHUB_MARKDOWN_REF}.
+# https://github.com/krumsieklab/maplet/blob/main/guide/maplet_Reference_Guide_markdown.md.
 #
 # NOTE: This example is divided into sections. Use SHIFT+CTRL+O to see the document outline.
 #

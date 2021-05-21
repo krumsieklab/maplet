@@ -4,7 +4,7 @@
 \alias{mtm_res_get_ptrs}
 \title{Extract all assay pointers for each function call}
 \usage{
-mtm_res_get_ptrs()
+mtm_res_get_ptrs(D)
 }
 \arguments{
 \item{D}{\code{SummarizedExperiment} input.}
