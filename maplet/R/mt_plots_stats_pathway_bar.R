@@ -181,12 +181,12 @@ mt_plots_stats_pathway_bar <- function(D,
       data_plot <- data_plot %>%
         dplyr::left_join(dict, by=c("name"=group_col)) %>%
         dplyr::rename(color=sym(color_col))
-
+      
       # create annotation data
       anno <- data.frame(name = rep(rd$name, times=sapply(rd[[group_col]], length) %>% as.vector()),
-                                 var = rep(rd$var, times=sapply(rd[[group_col]], length) %>% as.vector()),
-                                 pathway = unlist(rd[[group_col]]),
-                                 color = ifelse(!is.null(color_col), rep(rd[[color_col]], times=sapply(rd[[group_col]], length) %>% as.vector()),"pathway")) %>%
+                         var = rep(rd$var, times=sapply(rd[[group_col]], length) %>% as.vector()),
+                         pathway = unlist(rd[[group_col]]),
+                         color = if(!is.null(color_col)){rep(rd[[color_col]], times=sapply(rd[[group_col]], length) %>% as.vector())}else{"pathway"}) %>%
         dplyr::left_join(maplet::mtm_get_stat_by_name(D=D,name=ss) , by="var") %>%
         dplyr::select(-var)
 
