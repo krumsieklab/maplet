@@ -191,7 +191,6 @@ mt_plots_stats_pathway_bar <- function(D,
         dplyr::select(-var)
 
       # if pathway mapping exists in the metadata, use the names provided there
-
       x <- D %>% metadata
       if ("pathways" %in% names(x)){
         if (group_col %in% names(x$pathways)) {
@@ -200,14 +199,17 @@ mt_plots_stats_pathway_bar <- function(D,
             dplyr::left_join(x$pathways[[group_col]][,c("ID","pathway_name")], by=c("name"="ID"))
           anno %<>%
             dplyr::left_join(x$pathways[[group_col]][,c("ID","pathway_name")], by=c("pathway"="ID")) %>%
-            dplyr::select(name,pathway,pathway_name,color,everything())
+            dplyr::select(name,pathway_name,pathway,color,everything()) %>%
+            dplyr::rename(pathway_id=pathway, pathway=pathway_name)
 
           # set Unknown pathway names to Unknown
           if(length(which(is.na(data_plot$pathway_name)))>0){
             data_plot$pathway_name[which(is.na(data_plot$pathway_name))] <- "Unknown"
           }
-          # substitute codes for names
-          data_plot$name <- data_plot$pathway_name
+          # substitute codes for names and remove extra column
+          data_plot %<>% 
+            dplyr::mutate(name=pathway_name) %>%
+            dplyr::select(-pathway_name)
         } else{
           warning(sprintf("%s field not found in the metadata",group_col))
         }
