@@ -133,6 +133,7 @@ load_multiple_sheet_format <- function(file,
   result$metinfo$name   <- result$metinfo$Excel_column_name
   # fix variable names
   colnames(result$data) <- result$metinfo$CSV_column_name
+  colnames(result$sampleinfo) %<>% gsub(" ", "_", .)
   # generate summarized experiment
   D <- SummarizedExperiment(assay    = t(result$data),
                             colData  = result$sampleinfo,
@@ -166,18 +167,19 @@ load_single_sheet_format <- function (file=file,
   # add sample information
   result$sampleinfo <- raw[data_start:isamplast, 1:col_ids[1]]
   names(result$sampleinfo) <- c(unlist(raw[(tab_header-1), 1:(col_ids[1]-1)]), id_col)
-  result$sampleinfo %<>% select(id_col, everything())
+  result$sampleinfo %<>% dplyr::select(id_col, everything())
   # add metabolite information
   result$metinfo <- data.frame(name=unlist(raw[tab_header, col_ids[-1]]),
                                fullname=unlist(raw[(tab_header-1), col_ids[-1]]),
                                check.names = F)
   # add data
-  raw_data <- raw_data %>% select(-id_col) %>%
-    mutate_all(as.matrix) %>% mutate_all(as.numeric)
+  raw_data <- raw_data %>% dplyr::select(-id_col) %>%
+    dplyr::mutate_all(as.matrix) %>% dplyr::mutate_all(as.numeric)
   result$data <- data.frame(raw_data)
 
   # fix variable names
   colnames(result$data) <- result$metinfo$name
+  colnames(result$sampleinfo) %<>% gsub(" ", "_", .)
   # generate summarized experiment
   D <- SummarizedExperiment(assay    = t(result$data),
                             colData  = result$sampleinfo,
