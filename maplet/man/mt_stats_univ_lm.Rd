@@ -4,7 +4,14 @@
 \alias{mt_stats_univ_lm}
 \title{Univariate GLMs}
 \usage{
-mt_stats_univ_lm(D, formula, stat_name, samp_filter, n_cores = 1)
+mt_stats_univ_lm(
+  D,
+  formula,
+  stat_name,
+  samp_filter,
+  all_terms = F,
+  n_cores = 1
+)
 }
 \arguments{
 \item{D}{\code{SummarizedExperiment} input.}
@@ -15,6 +22,8 @@ mt_stats_univ_lm(D, formula, stat_name, samp_filter, n_cores = 1)
 
 \item{samp_filter}{Term which samples to filter to first (e.g. used if the data contains >2 groups but the user wants to
 run a two-group comparison).}
+
+\item{all_terms}{Whether to return all terms in formula in the statistical results table. Default: F.}
 
 \item{n_cores}{Number of cores to use for mclapply. More than one core will not work on Windows platforms. Default: 1.}
 }

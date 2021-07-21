@@ -14,6 +14,7 @@
 #' @param stat_name Name under which this comparison will be stored, must be unique to all other statistical results.
 #' @param samp_filter Term which samples to filter to first (e.g. used if the data contains >2 groups but the user wants to
 #'    run a two-group comparison).
+#' @param all_terms Whether to return all terms in formula in the statistical results table. Default: F.
 #' @param n_cores Number of cores to use for mclapply. More than one core will not work on Windows platforms. Default: 1.
 #'
 #' @return $result$output: Statistics object.
@@ -37,18 +38,19 @@ mt_stats_univ_lm <- function(D,
                              formula,
                              stat_name,
                              samp_filter,
+                             all_terms = F,
                              n_cores = 1) {
 
   # validate arguments
   stopifnot("SummarizedExperiment" %in% class(D))
 
   # make sure name does not exist yet
-  if (stat_name %in% unlist(maplet::mtm_res_get_entries(D, "stats") %>% purrr::map("output") %>% purrr::map("stat_name"))) stop(sprintf("stat element with name '%s' already exists",stat_name))
+  if (stat_name %in% unlist(maplet::mtm_res_get_entries(D, "stats") %>% purrr::map("output") %>% purrr::map("name"))) stop(sprintf("stat element with name '%s' already exists",stat_name))
 
   # merge data with sample info
   Ds <- D %>% maplet:::mti_format_se_samplewise() # NOTE: No explosion of dataset size, no gather() - 6/2/20, JK
 
-  ## FILTER SAMPLES
+  # apply sample filter
   if(!missing(samp_filter)) {
 
     filter_q <- dplyr::enquo(samp_filter)
@@ -60,7 +62,9 @@ mt_stats_univ_lm <- function(D,
     samples.used = rep(T, ncol(D))
   }
 
-  ## save outcome variable
+  ## SAVE OUTCOME VARIABLE ##
+  # Extract the fist attribute of the formula to use as outcome variable
+  # Ff outcome variable is interaction term (contains ':'), set is_interaction flag to TRUE.
   outvar       <- attr(stats::terms(formula, keep.order = T),"term.labels")[1]
   outvar_label <- outvar
   is_interaction <- FALSE
@@ -72,7 +76,9 @@ mt_stats_univ_lm <- function(D,
   if(any(!(outvar %in% colnames(Ds))))
     stop(sprintf("column %s do not exist in data", stringr::str_c(outvar[ !(outvar %in% colnames(Ds))], collapse = ", ")))
 
-  # handle factor outcomes
+  ## HANDLE FACTOR OUTCOMES ##
+  # If outcome variable is a factor, set do_anova flag to TRUE if > 2 levels. Crash if > 30 levels.
+  # Extract outvar_term (outcome variable + second factor level). Required for filtering in lines [ADD LINE NUMBERS].
   do_anova    <- FALSE
   outvar_term <- outvar
   for(o in seq_along(outvar)){
@@ -97,7 +103,10 @@ mt_stats_univ_lm <- function(D,
     outvar_term <- stringr::str_c(outvar_term, collapse = ":")
 
 
-  ## choose lm functions
+  ## CHOOSE LM & TIDY FUNCTIONS ##
+  # If random effect term is present in the formula (i.e. a term containing '|'), set has_random_eff
+  # flag to TRUE. Select the versions of lm and tidy functions to use depending on whether or not
+  # a random effect term is present.
   has_random_eff <- FALSE
   if(stringr::str_detect(as.character(formula[2]), "\\|")){
     maplet:::mti_logmsg("random effect detected; using lmer")
@@ -108,6 +117,8 @@ mt_stats_univ_lm <- function(D,
     f_lm   <- lm
     f_tidy <- broom::tidy # this calls summary()
   }
+  # Define wrapper function for extracting information for the models and converting to a table.
+  # Uses selected tidy method from above, called at line [INSERT LINE NUMBER]
   f_tidy_tidy <- function(m, ...){
     if(is.null(m))
       return(tibble::tibble(term = outvar_term))
@@ -117,7 +128,7 @@ mt_stats_univ_lm <- function(D,
   }
 
 
-  ## validate formula
+  ## VALIDATE FORMULA ##
   if (!is.null(formula.tools::lhs(formula))) stop("Left-hand side of formula must be empty")
   ## will crash sort of meaningfully if variables don't exist
   if(has_random_eff){
@@ -144,22 +155,29 @@ mt_stats_univ_lm <- function(D,
   }
 
 
-  ## function to create models
-  ## does checks to minimise errors
+  ## FUNCTION TO CREATE MDOELS ##
+  # For a feature m:
+  #   add m to LHS of formula
+  #   check whether m, outcome, and / or confounders are invariant
+  #     if m or outcome invariant, return NULL for model
+  #     if other confounders invariant, remove them from formula
+  #   run the linear model
   do_lm <- function(m){
-    ## run glm with updated formula
+    # add m to LHS of formula
     form <- stats::update(formula, sprintf("%s~.",m))
-    ## check for constant confounders
+    # extra formula terms and attach classes
     trms <- all.vars(formula) %>%
       purrr::discard(~stringr::str_detect(.x, ":")) %>%
       c(m)
     clss <- purrr::map_chr(trms, ~class(Ds[[.x]])) %>%
       stats::setNames(trms)
+
     ## subset to complete data
     d <- Ds %>%
       dplyr::select(dplyr::one_of(trms), !!rlang::sym(m)) %>%
       dplyr::filter(stats::complete.cases(.))
-    ## check for invariant vonfounders
+
+    ## check for invariant confounders
     conf_invar_num <- clss %>%
       purrr::keep(~.x %in% c("integer", "numeric")) %>%
       purrr::imap(~stats::var(d[[.y]])) %>%
@@ -170,7 +188,7 @@ mt_stats_univ_lm <- function(D,
       purrr::keep(~.x == 1)
     conf_invar <- c(conf_invar_num, conf_invar_fct)
     if(length(conf_invar) > 0){
-      ## terminate if feature or outcome are invariant
+      # return NULL for model if feature or outcome is invariant
       if(m %in% names(conf_invar)){
         maplet:::mti_logwarning(glue::glue("feature {m} invariant "))
         return(NULL)
@@ -179,41 +197,68 @@ mt_stats_univ_lm <- function(D,
         maplet:::mti_logwarning(glue::glue("outcome {outvar} invariant for feature {m}"))
         return(NULL)
       }
+      # remove invariant confounders from formula
       for(c in names(conf_invar)){
         maplet:::mti_logwarning(glue::glue("confounder {c} invariant for feature {m}, removing from formula"))
         form <- stats::update.formula(form, stringr::str_c(". ~ . -", c))
       }
     }
 
-    ## CALCLUATE ACTUAL MODEL
+    # calculate linear model
     mod <- f_lm(
       data    = Ds,
       formula = form
     )
     terms <- terms(mod)
-    ## DO ANOVA IF MULTIPLE FACTOR LEVELS
+
+    # perform ANOVA if multiple factor levels
     if(do_anova)
       mod <- stats::anova(mod)
-    ## attach linear model terms as attribute to the variable
-    ## (only way to make this compatible for both lm and anova, because they are very different data structures)
+    # attach linear model terms as attribute to the variable
+    # (only way to make this compatible for both lm and anova, because they are very different data structures)
     attr(mod, 'terms') <- terms
-    ## RETURN
-    mod
-  }
 
-  ## run tests for all features
+    # return
+    mod
+  } # END OF do_lm() FUNCTION DEFINITION
+
+  ## RUN TESTS FOR ALL FEATURES ##
   models <- parallel::mclapply(rownames(D), do_lm, mc.cores = n_cores) %>%
     stats::setNames(rownames(D))
 
-  # broom it up, subselect to term, rename term
-  if (do_anova) {
-    tab <- purrr::map_dfr(models, f_tidy_tidy, conf.int = T, .id = "var") %>%
-      dplyr::filter(term == outvar) %>%
-      dplyr::mutate(term =  outvar_label)
-  } else {
-    tab <- purrr::map_dfr(models, f_tidy_tidy, conf.int = T, .id = "var") %>%
-      dplyr::filter(term == outvar_term) %>%
-      dplyr::mutate(term =  outvar_label)
+  ## CONVERT LIST OF MODELS TO STATS TABLE ##
+  if(all_terms){
+    # get statistical table for all terms
+    tab <- purrr::map_dfr(models, f_tidy_tidy, conf.int = T, .id = "var")
+    form_terms <- tab$term %>% unique() %>% .[.!= outvar_term] %>% c(outvar, .)
+    ordered_cols <-  as.vector(outer(c("estimate", "std.error", "statistic", "df", "p.value"), form_terms, paste, sep="_"))
+
+    # format and order table
+    term_key <- outvar
+    names(term_key) <- outvar_term
+    tab %<>% dplyr::select(-dplyr::any_of(c("effect", "group"))) %>%
+      dplyr::mutate(term=dplyr::recode(term, !!!term_key)) %>%
+      tidyr::pivot_wider(names_from = term, values_from = c(estimate, std.error, statistic, df, p.value)) %>%
+      dplyr::mutate(term = outvar) %>%
+      dplyr::select(var, term, formula, ordered_cols) %>%
+      dplyr::select_if(~!all(is.na(.)))
+
+    # rename the outcome columns
+    old_names <- tab %>% dplyr::select(ends_with(outvar)) %>% colnames()
+    new_names <- gsub(paste0("_", outvar), "", old_names)
+    tab %<>% dplyr::rename_with(~ new_names[which(old_names == .x)], .cols = dplyr::all_of(old_names))
+
+  }else{
+    # broom it up, subselect to term, rename term
+    if (do_anova) {
+      tab <- purrr::map_dfr(models, f_tidy_tidy, conf.int = T, .id = "var") %>%
+        dplyr::filter(term == outvar) %>%
+        dplyr::mutate(term =  outvar_label)
+    } else {
+      tab <- purrr::map_dfr(models, f_tidy_tidy, conf.int = T, .id = "var") %>%
+        dplyr::filter(term == outvar_term) %>%
+        dplyr::mutate(term =  outvar_label)
+    }
   }
 
   ## tidy up a bit more
@@ -246,7 +291,7 @@ mt_stats_univ_lm <- function(D,
 
   ## add status information & results
   funargs <- maplet:::mti_funargs()
-  D %<>% 
+  D %<>%
     maplet:::mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("univariate lm, %s", as.character(formula)),
