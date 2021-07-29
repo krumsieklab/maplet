@@ -231,16 +231,18 @@ mt_stats_univ_lm <- function(D,
     # get statistical table for all terms
     tab <- purrr::map_dfr(models, f_tidy_tidy, conf.int = T, .id = "var")
     form_terms <- tab$term %>% unique() %>% .[.!= outvar_term] %>% c(outvar, .)
-    ordered_cols <-  as.vector(outer(c("estimate", "std.error", "statistic", "df", "p.value"), form_terms, paste, sep="_"))
+    exclude_cols <- c("var", "term", "formula", "effect", "group")
+    statres_cols <- dplyr::setdiff(colnames(tab), exclude_cols)
+    ordered_cols <-  as.vector(outer(statres_cols, form_terms, paste, sep="_"))
 
     # format and order table
     term_key <- outvar
     names(term_key) <- outvar_term
     tab %<>% dplyr::select(-dplyr::any_of(c("effect", "group"))) %>%
       dplyr::mutate(term=dplyr::recode(term, !!!term_key)) %>%
-      tidyr::pivot_wider(names_from = term, values_from = c(estimate, std.error, statistic, df, p.value)) %>%
+      tidyr::pivot_wider(names_from = term, values_from = dplyr::all_of(statres_cols)) %>%
       dplyr::mutate(term = outvar) %>%
-      dplyr::select(var, term, formula, ordered_cols) %>%
+      dplyr::select(var, term, formula, dplyr::all_of(ordered_cols)) %>%
       dplyr::select_if(~!all(is.na(.)))
 
     # rename the outcome columns
