@@ -488,16 +488,16 @@ mti_check_is_logged <- function(D){
   # if data is logged more than once, throw warning and return is_logged = FALSE
   num_times_logged <- called_functions %>% startsWith("pre_trans_log") %>% sum()
   if(num_times_logged > 1){
-    warning("Data logged multiple times! Cannot determine log status. is_logged will be set to FALSE.")
+    mti_logwarning("Data logged multiple times! Cannot determine log status. is_logged will be set to FALSE.")
     return(is_logged)
   }
 
   # if logging is reversed, throw warning and return is_logged = FALSE
   if(num_times_logged==1){
     log_index <- called_functions %>% startsWith("pre_trans_log") %>% which()
-    exp_after_logged <- called_functions[(first_log_index+1):length(called_functions)] %>% startsWith("pre_trans_exp") %>% any()
+    exp_after_logged <- called_functions[(log_index+1):length(called_functions)] %>% startsWith("pre_trans_exp") %>% any()
     if(exp_after_logged){
-      warning("Logging of data has been reversed! Cannot determine log stats. is_logged will be set to FALSE.")
+      mti_logwarning("Logging of data has been reversed! Cannot determine log stats. is_logged will be set to FALSE.")
       return(is_logged)
     }else{
       is_logged <- TRUE
