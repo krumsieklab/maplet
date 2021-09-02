@@ -374,7 +374,7 @@ mti_filter_samples <- function(Ds, filter_q, num_samp){
   # message("filter metabolites: ", metab_filter_q, " [", nrow(stat), " remaining]")
   # did we leave 0 rows?
   if (nrow(Ds)==0) stop("Filtering left 0 rows")
-  if (nrow(Ds)==num_samp) maplet:::mti_logwarning('filtering did not filter out any samples')
+  if (nrow(Ds)==num_samp) mti_logwarning('filtering did not filter out any samples')
 
   # store used samples
   samples.used <- rep(F, num_samp)
@@ -484,6 +484,7 @@ mti_check_is_logged <- function(D){
 
   # get names of the functions called
   called_functions <- names(metadata(D)$results)
+  num_calls <- length(called_functions)
 
   # if data is logged more than once, throw warning and return is_logged = FALSE
   num_times_logged <- called_functions %>% startsWith("pre_trans_log") %>% sum()
@@ -495,7 +496,11 @@ mti_check_is_logged <- function(D){
   # if logging is reversed, throw warning and return is_logged = FALSE
   if(num_times_logged==1){
     log_index <- called_functions %>% startsWith("pre_trans_log") %>% which()
-    exp_after_logged <- called_functions[(log_index+1):length(called_functions)] %>% startsWith("pre_trans_exp") %>% any()
+    if(log_index == num_calls){
+      exp_after_logged <- FALSE
+    }else{
+      exp_after_logged <- called_functions[(log_index+1):length(called_functions)] %>% startsWith("pre_trans_exp") %>% any()
+    }
     if(exp_after_logged){
       mti_logwarning("Logging of data has been reversed! Cannot determine log stats. is_logged will be set to FALSE.")
       return(is_logged)

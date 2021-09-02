@@ -17,7 +17,7 @@ purrr::zap()
 
 file_data <- system.file("extdata", "example_data/simulated_data.xlsx", package = "maplet")
 
-# PART 1 - STARTING A METABOTOOLS PIPELINE ----------------------------------------------------
+# PART 1 - STARTING A maplet PIPELINE ----------------------------------------------------
 
 D <-
   # validate checksum
@@ -132,7 +132,7 @@ D <- D %>%
 
 # Additional pre-processing functions
 #   - mt_pre_confounding_correction() - function for correcting confounding variables
-#   - mt_pre_confounding_correction_stepwise_aic() - an alterenative function for correcting confounders that uses stepwise aic
+#   - mt_pre_confounding_correction_stepaic() - an alterenative function for correcting confounders that uses stepwise aic
 # NOTES ON BEST PRACTICES: If incorporated in this pipeline, the above functions would correct for the variable age such that
 #     none of the following functions have to take care of those confounders anymore. If this function is included, confounders
 #     should not be included in any of the following functions. It is generally agreed that including the confounders in the

@@ -24,4 +24,5 @@
 #'   \item{colData}{Dataframe with 50 rows and 6 columns}
 #'   \item{rowData}{Dataframe with 50 rows and 15 columns}
 #'   \item{metadata}{empty list}
+#' }
 "D_ex2"
