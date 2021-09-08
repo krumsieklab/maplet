@@ -2,14 +2,29 @@ Package: maplet
 Type: Package
 Title: Metabolomics Anaysis PipeLinE Toolbox
 Version: 1.0.0
-Author: Jan Krumsiek, Elisa Benedetti, Richa Batra, Parviz Gomari, Mustafa Buyukozkan, Annalise Schweickart, Kelsey Chetnik
-Maintainer: Kelsey Chetnik <kelsey.chetnik@gmail.com>
-Description: Statistical toolbox for the creation of self-contained analytical pipelines, with a special focus on 
-   metabolomics datasets.
+Authors@R: c(
+    person("Kelsey", "Chetnik", email="kpc4002@med.cornell.edu", role=c("aut","cre")),
+    person("Elisa", "Benedetti", role=c("aut")),
+    person(c("Daniel", "Parviz"), "Gomari", role=c("aut")),
+    person("Annalise", "Schweickart", role=c("aut")),
+    person("Richa", "Batra", role=c("aut")),
+    person("Mustafa", "Buyukozkan", role=c("aut")),
+    person("Zeyu", "Wang", role=c("aut")),
+    person("Matthias", "Arnold", role=c("aut")),
+    person("Jonas", "Zierer", role=c("aut")),
+    person("Karsten", "Suhre", role=c("aut")),
+    person("Jan", "Krumsiek", role=c("aut")))
+Description: maplet is an R package for statistical data analysis with a special focus on metabolomics datasets. It allows users to 
+    create self-contained analytical pipelines. The toolbox builds upon the bioconductor package SummarizedExperiment (SE), which 
+    serves as a central repository for each pipeline’s data, analysis steps, and results. maplet provides a suite of functions for 
+    interacting with this container including but not limited to data loading, annotation, statistical analysis, visualization, and 
+    reporting. maplet is designed to work with a pipe operator - either the popular %>% operator from the magrittr package or the 
+    recently introduced |> from base R. This operator allows for smooth connections between pipeline steps, without the need for 
+    temporary variables or multiple assignments. The combination of these elements allows for the creation of pipelines which are 
+    simple to follow, highly modular, and easily reproducible.
 Depends: R (>= 3.6.0),
     magrittr,
     SummarizedExperiment
-biocViews:
 Imports:
     broom,
     broom.mixed,
@@ -25,18 +40,26 @@ Imports:
     ggnetwork,
     ggplot2,
     ggrepel,
+    gplots,
     glue,
     graphite,
+    httr,
+    igraph,
+    jsonlite,
     limma,
+    lme4,
     lmerTest,
     logging,
     MASS,
     MatrixEQTL,
     matrixStats,
+    metabolighteR,
     network,
     openxlsx,
     pathview,
     pheatmap,
+    plyr,
+    pracma,
     psych,
     purrr,
     R6,
@@ -62,3 +85,7 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
+Suggests: 
+    knitr
+VignetteBuilder: knitr
+biocViews: WorkflowStep, Metabolomics
