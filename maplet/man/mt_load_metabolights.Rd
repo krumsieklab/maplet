@@ -20,10 +20,10 @@ mt_load_metabolights(
 
 \item{study_id}{Identifier for the study of the form "MTBLS#" (where # is a number with 1 or more digits).}
 
-\item{met_file}{Metabolite table file (prefix "m_") to download. Separates into assay and rowData data frames. 
+\item{met_file}{Metabolite table file (prefix "m_") to download. Separates into assay and rowData data frames.
 Use metabolighteR::get_study_files(study_id) for a list of files available.}
 
-\item{samp_file}{Sample table file to download (prefix "s_"). Data for colData data frame. Use 
+\item{samp_file}{Sample table file to download (prefix "s_"). Data for colData data frame. Use
 metabolighteR::get_study_files(study_id) for a list of files available.}
 
 \item{samp_col}{Name of column containing sample names in sample table. Default: "Sample.Name".}
@@ -40,8 +40,8 @@ If first step in pipeline, creates \code{SummarizedExperiment} object. Populates
 colData, and rowData data frames.
 }
 \description{
-Load SummarizedExperiment data frames using the metabolighteR package to retrieve publicly available 
-data files from the metabolomics data repository Metabolights. If cache=TRUE, the assembled 
+Load SummarizedExperiment data frames using the metabolighteR package to retrieve publicly available
+data files from the metabolomics data repository Metabolights. If cache=TRUE, the assembled
 SummarizedExperiment object (with variable name "D_cache") will be saved to a local directory. This loader
 will always check for the presence of a cached file corresponding to the study ID and ion mode (optional)
 provided. If found, this file will be used and new data will not be downloaded.
@@ -49,8 +49,13 @@ provided. If found, this file will be used and new data will not be downloaded.
 \examples{
 \dontrun{
   # load data
-  D1 <-mt_load_metabolights(study_id = "MTBLS301")
-  D2 <- mt_load_metabolights(study_id = "MTBLS264")}
+  D1 <-mt_load_metabolights(study_id = "MTBLS301",
+                            met_file = "m_MTBLS301_LC-MS__metabolite_profiling_v2_maf.tsv",
+                            samp_file = "s_MTBLS301.txt")
+  D2 <- mt_load_metabolights(study_id = "MTBLS264",
+                             met_file = "m_mtbls264_POS_mass_spectrometry_v2_maf.tsv",
+                             samp_file = "s_MTBLS264.txt",
+                             samp_suffix="_POS")}
 
 }
 \author{
