@@ -1,7 +1,7 @@
 Package: maplet
 Type: Package
 Title: Metabolomics Anaysis PipeLinE Toolbox
-Version: 1.0.0
+Version: 1.1.0
 Authors@R: c(
     person("Kelsey", "Chetnik", email="kpc4002@med.cornell.edu", role=c("aut","cre")),
     person("Elisa", "Benedetti", role=c("aut")),
