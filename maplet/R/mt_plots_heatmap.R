@@ -1,7 +1,7 @@
 #' Heatmap plot by pheatmap
 #'
-#' Creates a heatmap using the function \code{pheatmap] from the \code{pheatmap] package. All \code{pheatmap::pheatmap}
-#' arguments can be passed \code{\href{https://github.com/raivokolde/pheatmap}{https://github.com/raivokolde/pheatmap}}.
+#' Creates a heatmap using the function \code{pheatmap} from the \code{pheatmap} package. All \code{pheatmap::pheatmap}
+#' arguments can be passed \href{https://github.com/raivokolde/pheatmap}{https://github.com/raivokolde/pheatmap}.
 #'
 #' @param D \code{SummarizedExperiment} object.
 #' @param scale_data Scaling the data. Default: T.
@@ -18,7 +18,7 @@
 #' @param gg_ymax Maximum coordinate for ggplot y-axis. Default: gg_scale.
 #' @param color Vector of colors used in heatmap.
 #' @param ggadd  Further elements/functions to add (+) to the ggplot object.
-#' @param \dots  See \code{pheatmap::pheatmap} for pheatmap arguments.
+#' @param ... See \code{pheatmap::pheatmap} for pheatmap arguments.
 #'
 #' @return $results$output: plot, heatmap
 #'
@@ -40,7 +40,7 @@
 mt_plots_heatmap <- function(D,
                              scale_data=F,
                              sym_zero=F,
-                             fun = function(x){ if(scale_data) return(scale(x)); x},
+                             fun = function(x){if(scale_data){return(scale(x))} else{x}},
                              silent = TRUE,
                              return_gg = T,
                              annotation_col = NA,

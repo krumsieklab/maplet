@@ -24,7 +24,7 @@ Adds a rowData or colData column representing the missingness of features or sam
    # load data
    mt_load_metabolon(file=file, sheet="data") \%>\%
    # add feature missingness column to rowData
-   mt_anno_missingness(anno_type = "features", out_col = "Feat_Missing")
+   mt_anno_missingness(anno_type = "features", out_col = "Feat_Missing") \%>\%
    # add sample missingness column to colData
    mt_anno_missingness(anno_type = "samples", out_col = "Samp_Missing")
 }

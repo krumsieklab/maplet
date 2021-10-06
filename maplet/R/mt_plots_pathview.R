@@ -96,12 +96,12 @@ mt_plots_pathview <- function(D,
                               limit = list(gene = 1, cpd = 1),
                               ...) {
 
-  require(pathview)
-  
+  requireNamespace(pathview)
+
   # get argument names from dots
   n <- sapply(as.list(substitute(list(...)))[-1L], deparse)
   dot_args <- names(n)
-  
+
   # check for defunct argument names
   if ("gene.id" %in% dot_args) stop("You used the old MT naming convention gene.id. Should be: gene_id.")
   if ("gene.data" %in% dot_args) stop("You used the old MT naming convention gene.data. Should be: gene_data.")

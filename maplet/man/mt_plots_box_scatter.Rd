@@ -39,6 +39,8 @@ mt_plots_box_scatter(
 
 \item{feat_sort}{If given, arrange will be applied to data variables will be sorted. Default: p.value.}
 
+\item{annotation}{If given adds annotation to plot. Default: p.value (see Usage for formatting).}
+
 \item{full_info}{Add full information of all sample annotations and statistics results to plot table data.frame?
 Makes plotting more flexible but can render SE objects huge. Default: F}
 

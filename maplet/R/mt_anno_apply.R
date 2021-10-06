@@ -44,9 +44,9 @@ mt_anno_apply <- function(D, anno_type, col_name, fun) {
   }
 
 
-  ## add status information & plot
+  ## add status information
   funargs <- mti_funargs()
-  D %<>% 
+  D %<>%
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("Transformed column '%s' of %s annotations", col_name, ifelse(anno_type=="samples","sample","feature"))

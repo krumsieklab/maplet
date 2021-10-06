@@ -3,7 +3,7 @@
 #' Creates two kinds of plots:
 #' \enumerate{
 #'   \item{missing value matrix view (samples and features)}
-#'   \item{sorted missing value % plot (samples and/or features)}
+#'   \item{sorted missing value percentage plot (samples and/or features)}
 #' }
 #'
 #' @param D \code{SummarizedExperiment} input.

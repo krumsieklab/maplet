@@ -12,7 +12,7 @@
 #' @param assoc_sign_col OPTIONAL. Parameter to discriminate between positive and negative associations. Needs to be the name
 #'    of a column in the statistical results indicated by stat_list.
 #' @param add_empty BOOLEAN. If TRUE adds also empty pathways to the barplot.
-#' @param keep_unmapped
+#' @param keep_unmapped BOOLEAN. If TRUE keep NULL values (specified as "Unmapped"). Default: FALSE.
 #' @param outfile OPTIONAL. Excel filename to save data to
 #' @param ggadd Further elements/functions to add (+) to the ggplot object.
 #' @param ... Additional expression directly passed to aes() of ggplot, can refer to colData.

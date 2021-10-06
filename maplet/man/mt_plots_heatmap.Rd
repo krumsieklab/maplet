@@ -8,7 +8,8 @@ mt_plots_heatmap(
   D,
   scale_data = F,
   sym_zero = F,
-  fun = function(x) {     if (scale_data)          return(scale(x))     x },
+  fun = function(x) {     if (scale_data) {         return(scale(x))     }     else {  
+          x     } },
   silent = TRUE,
   return_gg = T,
   annotation_col = NA,
@@ -55,13 +56,14 @@ mt_plots_heatmap(
 
 \item{color}{Vector of colors used in heatmap.}
 
-\item{\dots}{See \code{pheatmap::pheatmap} for pheatmap arguments.}
+\item{...}{See \code{pheatmap::pheatmap} for pheatmap arguments.}
 }
 \value{
 $results$output: plot, heatmap
 }
 \description{
-
+Creates a heatmap using the function \code{pheatmap} from the \code{pheatmap} package. All \code{pheatmap::pheatmap}
+arguments can be passed \href{https://github.com/raivokolde/pheatmap}{https://github.com/raivokolde/pheatmap}.
 }
 \examples{
 \dontrun{D \%>\%

@@ -40,23 +40,6 @@ mt_load_metabolon_v1 <- function(D, file, sheet, copy_nan_sheet='') {
     result$meta <- metadata(D)
   }
 
-  # initialize result list
-  result=list()
-
-  # validate arguments
-  if (missing(file)) stop("file must be provided")
-  if (missing(sheet)) stop("sheet must be provided")
-
-  # get metadata from D if present
-  if(!missing(D)){
-    # validate SE
-    if ("SummarizedExperiment" %in% class(D) == F) stop("D is not of class SummarizedExperiment")
-    if (length(assays(D))!=0) stop("Passed SummarizedExperiment assay must be empty!")
-
-    # get metadata
-    result$meta <- metadata(D)
-  }
-
   # using readxl package:
   raw = readxl::read_excel(path=file, sheet=sheet, col_names = F)
 

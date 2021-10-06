@@ -9,7 +9,7 @@
 #' @param correct_confounder Confounders to adjust for before plotting, formula notation.
 #' @param feat_filter If given, filter will be applied to data and remaining variables will be labeled in plot. Default: p.value<0.05.
 #' @param feat_sort If given, arrange will be applied to data variables will be sorted. Default: p.value.
-#' @param annotation If given adds annotation to plot. Default: "{sprintf('P-value: %.1e', p.value)}".
+#' @param annotation If given adds annotation to plot. Default: p.value (see Usage for formatting).
 #' @param full_info Add full information of all sample annotations and statistics results to plot table data.frame?
 #'    Makes plotting more flexible but can render SE objects huge. Default: F
 #' @param text_size Text size of the annotations. Default: 3.88.

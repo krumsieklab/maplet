@@ -40,6 +40,8 @@ of a column in the statistical results indicated by stat_list.}
 
 \item{add_empty}{BOOLEAN. If TRUE adds also empty pathways to the barplot.}
 
+\item{keep_unmapped}{BOOLEAN. If TRUE keep NULL values (specified as "Unmapped"). Default: FALSE.}
+
 \item{outfile}{OPTIONAL. Excel filename to save data to}
 
 \item{ggadd}{Further elements/functions to add (+) to the ggplot object.}
