@@ -47,12 +47,12 @@ mt_load_metabolomics_workbench <- function(D, study_id, analysis_id, cache=FALSE
 
   # load cached file if available
   if(!missing(cache_file) && file.exists(cache_file)){
-    maplet:::mti_logstatus("Cached file found. Loading data from file.")
+    mti_logstatus("Cached file found. Loading data from file.")
     D <- readRDS(cache_file)
     # download data from Metabolomics Workbench
   }else{
     # download data files
-    maplet:::mti_logstatus("Downloading data from Metabolomics Workbench...")
+    mti_logstatus("Downloading data from Metabolomics Workbench...")
     # retrieve data from URL
     call <- glue::glue("https://www.metabolomicsworkbench.org/rest/study/study_id/{study_id}/mwtab")
     query_results <- httr::GET(call, timeout = 60, encode = "json")
@@ -133,9 +133,9 @@ mt_load_metabolomics_workbench <- function(D, study_id, analysis_id, cache=FALSE
   # add status information
   logtxt = glue::glue("Loaded Data from Metabolomics Workbench for Study ID: {study_id}")
   if(!missing(analysis_id)) log_txt <- glue::glue(logtxt, ", Analysis ID: {analysis_id}")
-  funargs <- maplet:::mti_funargs()
+  funargs <- mti_funargs()
   D %<>%
-    maplet:::mti_generate_result(
+    mti_generate_result(
       funargs = funargs,
       logtxt = logtxt
     )

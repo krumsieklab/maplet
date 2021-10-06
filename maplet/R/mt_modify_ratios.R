@@ -36,7 +36,7 @@ mt_modify_ratios <- function(D, stat_name, edge_filter, neighborhood = 1){
     ## FOLDCHANGE FUNCTION (CONSIDER PREVIOUS LOG)
     op <- "/"
     if (length(maplet::mtm_res_get_entries(D, c("pre","trans","log"))) > 0){
-        maplet:::mti_logstatus("data already logscale, using '-'")
+        mti_logstatus("data already logscale, using '-'")
         op <- "-"
     }
 
@@ -113,9 +113,9 @@ mt_modify_ratios <- function(D, stat_name, edge_filter, neighborhood = 1){
                               metadata = metadata(D))
 
     ## add status information & plot
-    funargs <- maplet:::mti_funargs()
+    funargs <- mti_funargs()
     D %<>% 
-        maplet:::mti_generate_result(
+        mti_generate_result(
             funargs = funargs,
             logtxt = sprintf("created %d feature ratios out of %d features", nrow(D), p),
             output = NULL

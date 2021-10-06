@@ -52,9 +52,9 @@ mt_reporting_stats <- function(D, stat_name, stat_filter) {
   }
 
   # add status information & plot
-  funargs <- maplet:::mti_funargs()
+  funargs <- mti_funargs()
   D %<>% 
-    maplet:::mti_generate_result(
+    mti_generate_result(
       funargs = funargs,
       logtxt = logtxt
     )

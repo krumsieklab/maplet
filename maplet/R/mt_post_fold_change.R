@@ -63,8 +63,8 @@ mt_post_fold_change <- function(D,
   if (length(terms)>1) {
     # construct new formula
     conf_form <- as.formula(sprintf("~%s", paste0(terms[2:length(terms)], collapse = "+")))
-    maplet:::mti_logstatus(glue::glue("correcting for {as.character(conf_form)}"))
-    D1 <- maplet:::mti_correctConfounder(D, conf_form) # store in different object to not change original SummarizedExperiment
+    mti_logstatus(glue::glue("correcting for {as.character(conf_form)}"))
+    D1 <- mti_correctConfounder(D, conf_form) # store in different object to not change original SummarizedExperiment
     # get data-frame from corrected one
   } else {
     # no confounding correction
@@ -116,9 +116,9 @@ mt_post_fold_change <- function(D,
 
 
   ## add status information & plot
-  funargs <- maplet:::mti_funargs()
+  funargs <- mti_funargs()
   D %<>% 
-    maplet:::mti_generate_result(
+    mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("Calculated foldchanges for %s", stat_name)
     )

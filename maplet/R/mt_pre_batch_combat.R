@@ -27,7 +27,7 @@ mt_pre_batch_combat = function(D, batch_col) {
   }
 
   # check if data is logged, if not log the data
-  is_logged <- maplet:::mti_check_is_logged(D)
+  is_logged <- mti_check_is_logged(D)
   if(!is_logged){
     X <- log(X, base = 2)
   }

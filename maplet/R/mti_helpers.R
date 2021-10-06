@@ -24,7 +24,7 @@ mti_get_ml_res_by_name <- function(D, name){
     stop("no results element found in D")
   }
 
-  stats <- maplet:::mti_res_get_path(D,"ml")
+  stats <- mti_res_get_path(D,"ml")
 
   if(length(stats) == 0){
     stop("no stats element found in D")

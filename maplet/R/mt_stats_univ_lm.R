@@ -48,14 +48,14 @@ mt_stats_univ_lm <- function(D,
   if (stat_name %in% unlist(maplet::mtm_res_get_entries(D, "stats") %>% purrr::map("output") %>% purrr::map("name"))) stop(sprintf("stat element with name '%s' already exists",stat_name))
 
   # merge data with sample info
-  Ds <- D %>% maplet:::mti_format_se_samplewise() # NOTE: No explosion of dataset size, no gather() - 6/2/20, JK
+  Ds <- D %>% mti_format_se_samplewise() # NOTE: No explosion of dataset size, no gather() - 6/2/20, JK
 
   # apply sample filter
   if(!missing(samp_filter)) {
 
     filter_q <- dplyr::enquo(samp_filter)
     num_samp <- ncol(D)
-    samples.used <- maplet:::mti_filter_samples(Ds, filter_q, num_samp)
+    samples.used <- mti_filter_samples(Ds, filter_q, num_samp)
     Ds <- Ds[samples.used,] %>% droplevels()
 
   } else {
@@ -71,7 +71,7 @@ mt_stats_univ_lm <- function(D,
   if(stringr::str_detect(outvar, ":")){
     outvar <- strsplit(outvar, ":") %>% unlist()
     is_interaction <- TRUE
-    maplet:::mti_logmsg("calculating interaction term")
+    mti_logmsg("calculating interaction term")
   }
   if(any(!(outvar %in% colnames(Ds))))
     stop(sprintf("column %s do not exist in data", stringr::str_c(outvar[ !(outvar %in% colnames(Ds))], collapse = ", ")))
@@ -109,7 +109,7 @@ mt_stats_univ_lm <- function(D,
   # a random effect term is present.
   has_random_eff <- FALSE
   if(stringr::str_detect(as.character(formula[2]), "\\|")){
-    maplet:::mti_logmsg("random effect detected; using lmer")
+    mti_logmsg("random effect detected; using lmer")
     f_lm     <- lmerTest::lmer
     f_tidy   <- broom.mixed::tidy # this calls summary()
     has_random_eff <- TRUE
@@ -190,16 +190,16 @@ mt_stats_univ_lm <- function(D,
     if(length(conf_invar) > 0){
       # return NULL for model if feature or outcome is invariant
       if(m %in% names(conf_invar)){
-        maplet:::mti_logwarning(glue::glue("feature {m} invariant "))
+        mti_logwarning(glue::glue("feature {m} invariant "))
         return(NULL)
       }
       if(any(outvar %in% names(conf_invar))){
-        maplet:::mti_logwarning(glue::glue("outcome {outvar} invariant for feature {m}"))
+        mti_logwarning(glue::glue("outcome {outvar} invariant for feature {m}"))
         return(NULL)
       }
       # remove invariant confounders from formula
       for(c in names(conf_invar)){
-        maplet:::mti_logwarning(glue::glue("confounder {c} invariant for feature {m}, removing from formula"))
+        mti_logwarning(glue::glue("confounder {c} invariant for feature {m}, removing from formula"))
         form <- stats::update.formula(form, stringr::str_c(". ~ . -", c))
       }
     }
@@ -292,9 +292,9 @@ mt_stats_univ_lm <- function(D,
   samples.used[is.na(Ds[, outvar])] <- F
 
   ## add status information & results
-  funargs <- maplet:::mti_funargs()
+  funargs <- mti_funargs()
   D %<>%
-    maplet:::mti_generate_result(
+    mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("univariate lm, %s", as.character(formula)),
       output = list(

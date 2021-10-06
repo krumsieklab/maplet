@@ -39,14 +39,14 @@ mt_stats_univ_wilcox <- function(D, in_col, stat_name, samp_filter, paired=F, ex
   if (stat_name %in% unlist(maplet::mtm_res_get_entries(D, "stats") %>% purrr::map("output") %>% purrr::map("name"))) stop(sprintf("stat element with name '%s' already exists",stat_name))
 
   # merge data with sample info
-  Ds <- D %>% maplet:::mti_format_se_samplewise() # NOTE: No explosion of dataset size, no gather() - 8/17/20, JK
+  Ds <- D %>% mti_format_se_samplewise() # NOTE: No explosion of dataset size, no gather() - 8/17/20, JK
 
   ## FILTER SAMPLES
   if(!missing(samp_filter)) {
 
     filter_q <- dplyr::enquo(samp_filter)
     num_samp <- ncol(D)
-    samples.used <- maplet:::mti_filter_samples(Ds, filter_q, num_samp)
+    samples.used <- mti_filter_samples(Ds, filter_q, num_samp)
     Ds <- Ds[samples.used,]
 
   } else {
@@ -96,9 +96,9 @@ mt_stats_univ_wilcox <- function(D, in_col, stat_name, samp_filter, paired=F, ex
   samples.used[is.na(Ds[[in_col]])] <- F
 
   ## add status information & results
-  funargs <- maplet:::mti_funargs()
-  D %<>% 
-    maplet:::mti_generate_result(
+  funargs <- mti_funargs()
+  D %<>%
+    mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("Wilcox rank sum test, %s", in_col),
       output = list(

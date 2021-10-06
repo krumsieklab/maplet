@@ -65,9 +65,9 @@ mt_load_nightingale <- function(D,
   } else {stop(sprintf('Unknown format type, %s!', format_type))}
 
   # add status information
-  funargs <- maplet:::mti_funargs()
+  funargs <- mti_funargs()
   D %<>% 
-    maplet:::mti_generate_result(
+    mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("loaded Nightingale file: %s, sheet: %s", basename(file), data_sheet)
     )

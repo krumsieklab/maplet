@@ -38,9 +38,9 @@ mt_clean_fix_ggplot <- function(D){
 
   }
 
-  funargs <- maplet:::mti_funargs()
+  funargs <- mti_funargs()
   D %<>% 
-     maplet:::mti_generate_result(
+     mti_generate_result(
        funargs = funargs,
        logtxt = glue::glue("Fixed all ggplot objects.")
      )

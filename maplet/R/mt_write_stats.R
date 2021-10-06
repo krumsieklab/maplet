@@ -26,7 +26,7 @@ mt_write_stats <- function(D, file, stat_list=NULL, sort_by_p=F, feat_col=NULL) 
   stopifnot(is.character(file))
 
   # get all stats entries
-  S <- D %>% maplet:::mtm_res_get_entries("stats")
+  S <- D %>% mtm_res_get_entries("stats")
   allcomps <- S %>% purrr::map("output") %>% purrr::map("name") %>% unlist()
 
   # restrict to one or output all?
@@ -70,9 +70,9 @@ mt_write_stats <- function(D, file, stat_list=NULL, sort_by_p=F, feat_col=NULL) 
   openxlsx::saveWorkbook(wb, file, overwrite=T)
 
   # add status information
-  funargs <- maplet:::mti_funargs()
+  funargs <- mti_funargs()
   D %<>% 
-    maplet:::mti_generate_result(
+    mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("Exported sheets '%s' to Excel file '%s'",
                        S %>% purrr::map("output") %>% purrr::map("name") %>% unlist() %>% paste0(collapse = ', '), file)

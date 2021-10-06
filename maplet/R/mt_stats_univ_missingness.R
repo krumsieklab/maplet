@@ -32,8 +32,8 @@ mt_stats_univ_missingness <- function(D, in_col, stat_name, samp_filter) {
 
     filter_q <- dplyr::enquo(samp_filter)
     num_samp <- ncol(Ds)
-    samples.used <-  Ds %>% maplet:::mti_format_se_samplewise() %>%
-      maplet:::mti_filter_samples(filter_q, num_samp)
+    samples.used <-  Ds %>% mti_format_se_samplewise() %>%
+      mti_filter_samples(filter_q, num_samp)
     Ds <- Ds[,samples.used]
 
   } else {
@@ -83,9 +83,9 @@ mt_stats_univ_missingness <- function(D, in_col, stat_name, samp_filter) {
   rownames(res) <- NULL
 
   ## add status information & results
-  funargs <- maplet:::mti_funargs()
+  funargs <- mti_funargs()
   D %<>% 
-    maplet:::mti_generate_result(
+    mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("missingness analysis with variable %s", as.character(in_col)),
       output = list(

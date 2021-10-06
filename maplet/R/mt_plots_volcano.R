@@ -56,12 +56,12 @@ mt_plots_volcano <- function(D,
     as.data.frame() %>%
     dplyr::mutate(var = rownames(D))
   # remove rows not needed for plotting
-  vars <- c(maplet:::mti_extract_variables(c(dplyr::enquo(x), dplyr::enquo(feat_filter), quos(...))),"var","name")
+  vars <- c(mti_extract_variables(c(dplyr::enquo(x), dplyr::enquo(feat_filter), quos(...))),"var","name")
   rd <- rd[,colnames(rd) %in% vars,drop=F]
 
 
   ## stat
-  data_plot <- maplet:::mtm_get_stat_by_name(D, stat_name)
+  data_plot <- mtm_get_stat_by_name(D, stat_name)
   if(quo_name(x) %in% colnames(data_plot)==F) stop(glue::glue("Column {quo_name(x)} not found in stat table."))
   data_plot %<>% dplyr::inner_join(rd, by = "var") %>%
     dplyr::mutate(xxx = !!x)
@@ -77,7 +77,7 @@ mt_plots_volcano <- function(D,
 
   ## determine if and where to draw hline
   if (!missing(hline)) {
-    hliney <- maplet:::mtm_get_stat_by_name(D, stat_name) %>%
+    hliney <- mtm_get_stat_by_name(D, stat_name) %>%
       dplyr::inner_join(rd, by = "var") %>%
       dplyr::mutate(xxx = !!x) %>% dplyr::filter(!!dplyr::enquo(hline)) %>% .$p.value %>% max()
   } else {
@@ -105,7 +105,7 @@ mt_plots_volcano <- function(D,
 
   ## ADD FEATURE LABELS
   if(!missing(feat_filter)){
-    maplet:::mti_logstatus("add label")
+    mti_logstatus("add label")
     feat_filter_q <- dplyr::enquo(feat_filter)
     data_annotate <- data_plot %>%
       dplyr::filter(!!feat_filter_q)
@@ -114,20 +114,20 @@ mt_plots_volcano <- function(D,
   }
 
   ## ADD AXIS GROUPS
-  d <- maplet:::mtm_get_stat_by_name(D, stat_name, fullstruct=T)
+  d <- mtm_get_stat_by_name(D, stat_name, fullstruct=T)
   if ("groups" %in% names(d) && length(d$groups)==2) {
-    p <- maplet:::mti_add_leftright_gg(p, paste0(d$groups[1],' high'), paste0(d$groups[2],' high'))
+    p <- mti_add_leftright_gg(p, paste0(d$groups[1],' high'), paste0(d$groups[2],' high'))
   }
 
   # add custom elements?
   if (!is.null(ggadd)) p <- p+ggadd
 
   ## add status information & plot
-  funargs <- maplet:::mti_funargs()
+  funargs <- mti_funargs()
   D %<>% 
-    maplet:::mti_generate_result(
+    mti_generate_result(
       funargs = funargs,
-      logtxt = sprintf("volcano plot, aes: %s", maplet:::mti_dots_to_str(...)),
+      logtxt = sprintf("volcano plot, aes: %s", mti_dots_to_str(...)),
       output = list(p)
     )
   ## return

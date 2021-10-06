@@ -35,7 +35,7 @@ mt_stats_cormat_genenet = function(D, stat_name, samp_filter) {
 
     filter_q <- dplyr::enquo(samp_filter)
     num_samp <- ncol(D)
-    samples.used <- maplet:::mti_filter_samples(Ds, filter_q, num_samp)
+    samples.used <- mti_filter_samples(Ds, filter_q, num_samp)
     Ds <- Ds[samples.used,]
 
   } else {

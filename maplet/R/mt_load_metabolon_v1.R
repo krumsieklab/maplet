@@ -153,9 +153,9 @@ mt_load_metabolon_v1 <- function(D, file, sheet, copy_nan_sheet='') {
   if (is.null(rownames(D))) rownames(D) <- result$metinfo$BIOCHEMICAL
 
   # add status information
-  funargs <- maplet:::mti_funargs()
-  D %<>% 
-    maplet:::mti_generate_result(
+  funargs <- mti_funargs()
+  D %<>%
+    mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("loaded Metabolon file: %s, sheet: %s", basename(file), sheet)
     )

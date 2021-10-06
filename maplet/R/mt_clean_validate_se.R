@@ -37,9 +37,9 @@ mt_clean_validate_se <- function(D){
   metadata(D) <- list(sessionInfo=utils::sessionInfo())
   
   # add status information
-  funargs <- maplet:::mti_funargs()
+  funargs <- mti_funargs()
   D %<>% 
-    maplet:::mti_generate_result(
+    mti_generate_result(
       funargs = funargs,
       logtxt = "External SE object validated maplet-compatible."
     )

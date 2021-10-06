@@ -36,14 +36,14 @@ mt_stats_univ_cor <- function(D, stat_name, in_col, method, samp_filter, exact=N
   if (stat_name %in% unlist(maplet::mtm_res_get_entries(D, "stats") %>% purrr::map("output") %>% purrr::map("stat_name"))) stop(sprintf("stat element with stat_name '%s' already exists",stat_name))
 
   # merge data with sample info
-  Ds <- D %>% maplet:::mti_format_se_samplewise() # NOTE: No explosion of dataset size, no gather() - 6/2/20, JK
+  Ds <- D %>% mti_format_se_samplewise() # NOTE: No explosion of dataset size, no gather() - 6/2/20, JK
 
   ## FILTER SAMPLES
   if(!missing(samp_filter)) {
 
     filter_q <- dplyr::enquo(samp_filter)
     num_samp <- ncol(D)
-    samples.used <- maplet:::mti_filter_samples(Ds, filter_q, num_samp)
+    samples.used <- mti_filter_samples(Ds, filter_q, num_samp)
     Ds <- Ds[samples.used,]
 
   } else {
@@ -86,9 +86,9 @@ mt_stats_univ_cor <- function(D, stat_name, in_col, method, samp_filter, exact=N
   outgroups <- unique(Ds[[in_col]])
 
   # add status information
-  funargs <- maplet:::mti_funargs()
+  funargs <- mti_funargs()
   D %<>% 
-    maplet:::mti_generate_result(
+    mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("%s correlation to %s", method, in_col),
       output = list(

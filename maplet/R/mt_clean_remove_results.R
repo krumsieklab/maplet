@@ -39,9 +39,9 @@ mt_clean_remove_results <- function(D, remove="all") {
   }
 
   # add status information & plot
-  funargs <- maplet:::mti_funargs()
+  funargs <- mti_funargs()
   D %<>% 
-    maplet:::mti_generate_result(
+    mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("Removed metadata results: %s", remove)
     )

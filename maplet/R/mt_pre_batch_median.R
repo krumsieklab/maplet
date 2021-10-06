@@ -32,7 +32,7 @@ mt_pre_batch_median = function(D, batch_col, ref_samples) {
   # no negative values allowed
   if (min(X,na.rm=T)<0) stop("Matrix contains negative values.")
   # select correct operator for logged or non-logged data
-  is_logged <- maplet:::mti_check_is_logged(D)
+  is_logged <- mti_check_is_logged(D)
   if(is_logged){
     op <- `-`
     opstr <- "-"
@@ -78,9 +78,9 @@ mt_pre_batch_median = function(D, batch_col, ref_samples) {
   refadd <- if(missing(ref_samples)){""}else{sprintf(": %s", as.character(dplyr::enquo(ref_samples)))}
 
   # add status information
-  funargs <- maplet:::mti_funargs()
+  funargs <- mti_funargs()
   D %<>% 
-    maplet:::mti_generate_result(
+    mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("median-scaling per batch in '%s', based on %d reference samples%s",batch_col,sum(use_samples),refadd)
     )

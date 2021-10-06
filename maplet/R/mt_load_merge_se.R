@@ -104,9 +104,9 @@ mt_load_merge_se <- function(D1, id_col1, D2, id_col2, crash_on_duplicate = T, s
   
   ## -- return SE object -- ##
   # add status information
-  funargs <- maplet:::mti_funargs()
+  funargs <- mti_funargs()
   D %<>% 
-    maplet:::mti_generate_result(
+    mti_generate_result(
       funargs = funargs,
       logtxt = glue::glue("Merged two SE objects."),
       output = metadata(D2)$results

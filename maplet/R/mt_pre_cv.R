@@ -51,9 +51,9 @@ mt_pre_cv <- function(D, qc_samples, out_col, replicates=F, id_col=NULL){
   }
 
   ## add status information
-  funargs <- maplet:::mti_funargs()
+  funargs <- mti_funargs()
   D %<>% 
-    maplet:::mti_generate_result(
+    mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("Added QC cv to rowData")
       )

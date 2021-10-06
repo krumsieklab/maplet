@@ -78,9 +78,9 @@ mt_plots_stats_compare <- function(D1,
   if (!(filter_op %in% c("AND","OR"))) stop("filter_op must be 'AND' or 'OR'")
 
   ## obtain the two stats structures
-  s1 <- maplet:::mtm_get_stat_by_name(D1, stat1, fullstruct=T)
+  s1 <- mtm_get_stat_by_name(D1, stat1, fullstruct=T)
   s1t <- s1$table
-  s2 <- maplet:::mtm_get_stat_by_name(D2, stat2, fullstruct=T)
+  s2 <- mtm_get_stat_by_name(D2, stat2, fullstruct=T)
   s2t <- s2$table
 
   # if use_estimate==T, check that estimate column exists
@@ -145,9 +145,9 @@ mt_plots_stats_compare <- function(D1,
 
   if (!return_plot_only) {
     ## add status information & plot
-    funargs <- maplet:::mti_funargs()
+    funargs <- mti_funargs()
     D1 %<>%
-      maplet::: mti_generate_result(
+       mti_generate_result(
         funargs = funargs,
         logtxt = sprintf("comparison plot between '%s' and '%s'", stat1, stat2),
         output = list(p),

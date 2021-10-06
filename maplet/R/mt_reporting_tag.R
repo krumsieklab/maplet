@@ -26,9 +26,9 @@ mt_reporting_tag <- function(D, tag_name){
   if(missing(tag_name)) stop("A value for tag_name must be provided!")
 
   # add status information & plot
-  funargs <- maplet:::mti_funargs()
+  funargs <- mti_funargs()
   D %<>% 
-    maplet:::mti_generate_result(
+    mti_generate_result(
       funargs = funargs,
       logtxt = glue::glue("Added reference tag: {tag_name}."),
       output = tag_name

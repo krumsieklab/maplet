@@ -64,7 +64,7 @@ mt_load_metabolights <- function(D,
 
   # load cached file if available
   if(!missing(cache_file) && file.exists(cache_file)){
-    maplet:::mti_logstatus("Cached file found. Loading data from file.")
+    mti_logstatus("Cached file found. Loading data from file.")
     D <- readRDS(cache_file)
   # download data from Metabolights
   }else{
@@ -75,7 +75,7 @@ mt_load_metabolights <- function(D,
     if(met_file %in% studyFileList$file == F) stop(glue::glue("Unrecognized metabolite file name for study {study_id}: {met_file}."))
 
     # download data files
-    maplet:::mti_logstatus("Downloading data from MetaboLights...")
+    mti_logstatus("Downloading data from MetaboLights...")
     # metabolite table - assay + rowData
     met_tab <- metabolighteR::download_study_file(study_id, met_file) %>% suppressMessages()
 
@@ -122,9 +122,9 @@ mt_load_metabolights <- function(D,
 
   # add status information
   logtxt = glue::glue("Loaded Data from MetaboLights for Study ID: {study_id}")
-  funargs <- maplet:::mti_funargs()
+  funargs <- mti_funargs()
   D %<>%
-    maplet:::mti_generate_result(
+    mti_generate_result(
       funargs = funargs,
       logtxt = logtxt
     )

@@ -78,14 +78,14 @@ mt_plots_box_scatter <- function(D,
   if ("manual_ylabel" %in% dot_args) stop("You used the old MT naming convention manual_ylabel. Should be: ylabel")
   if ("fitline" %in% dot_args) stop("You used the old MT naming convention fitline. Should be: fit_line")
   if ("fitline_se" %in% dot_args) stop("You used the old MT naming convention fitline_se. Should be: fit_line_se")
-  
+
   # create dummy SE so original not changed
   Ds <- D
 
   ## CONFOUNDER
   if(!missing(correct_confounder)){
-    maplet:::mti_logstatus(glue::glue("correcting for {correct_confounder}"))
-    Ds <- maplet:::mti_correctConfounder(Ds, correct_confounder)
+    mti_logstatus(glue::glue("correcting for {correct_confounder}"))
+    Ds <- mti_correctConfounder(Ds, correct_confounder)
   }
 
   ## rowData
@@ -109,7 +109,7 @@ mt_plots_box_scatter <- function(D,
     feat_filter_q <- dplyr::enquo(feat_filter)
     stat <- stat %>%
       dplyr::filter(!!feat_filter_q)
-    maplet:::mti_logstatus(glue::glue("filter features: {feat_filter_q} [{nrow(stat)} remaining]"))
+    mti_logstatus(glue::glue("filter features: {feat_filter_q} [{nrow(stat)} remaining]"))
   }
 
   ## SORT FEATURES
@@ -120,12 +120,12 @@ mt_plots_box_scatter <- function(D,
       dplyr::arrange(!!feat_sort_q) %>%
       ## sort according to stat
       dplyr::mutate(name = factor(name, levels = unique(name)))
-    maplet:::mti_logstatus(glue::glue("sorted features: {feat_sort_q}"))
+    mti_logstatus(glue::glue("sorted features: {feat_sort_q}"))
   }
 
   ## CREATE PLOT
   dummy <- Ds %>%
-    maplet:::mti_format_se_samplewise() %>% # NOTE: No explosion of dataset size due to active restriction - 6/2/20, JK
+    mti_format_se_samplewise() %>% # NOTE: No explosion of dataset size due to active restriction - 6/2/20, JK
     tidyr::gather(var, value, dplyr::one_of(rownames(Ds)))
   ## filter to groups?
   if(plot_type=="box"){
@@ -268,11 +268,11 @@ mt_plots_box_scatter <- function(D,
   }
 
   ## add status information & plot
-  funargs <- maplet:::mti_funargs()
-  D %<>% 
-    maplet:::mti_generate_result(
+  funargs <- mti_funargs()
+  D %<>%
+    mti_generate_result(
       funargs = funargs,
-      logtxt = sprintf("Feature ",ifelse(plot_type=="box", "boxplots", "scatter plots"),", aes: %s", maplet:::mti_dots_to_str(...)),
+      logtxt = sprintf("Feature ",ifelse(plot_type=="box", "boxplots", "scatter plots"),", aes: %s", mti_dots_to_str(...)),
       output = p,
       output2 = output2
     )

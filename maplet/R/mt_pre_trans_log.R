@@ -29,9 +29,9 @@ mt_pre_trans_log <- function(D, base=2) {
   assay(D) = log(assay(D), base = base)
 
   # add status information
-  funargs <- maplet:::mti_funargs()
+  funargs <- mti_funargs()
   D %<>% 
-    maplet:::mti_generate_result(
+    mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("log%f", base)
     )

@@ -52,9 +52,9 @@ mt_settings <- function(D, settings) {
   log_final <- names(s) %>% purrr::map(~paste0(.,"=",s[.])) %>% unlist() %>% paste0(collapse = ", ")
 
   # add status information & plot
-  funargs <- maplet:::mti_funargs()
+  funargs <- mti_funargs()
   D %<>% 
-    maplet:::mti_generate_result(
+    mti_generate_result(
       funargs = funargs,
       logtxt = glue::glue("Changes to settings: {log_changes}. Final setting list: {log_final}")
     )

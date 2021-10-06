@@ -77,7 +77,7 @@ mt_plots_multstats_heatmap <- function(D,
   }
 
   # extract stat results
-  stat_res <- stat_list %>% lapply(function(i){maplet:::mtm_get_stat_by_name(D, i) %>%
+  stat_res <- stat_list %>% lapply(function(i){mtm_get_stat_by_name(D, i) %>%
       dplyr::mutate(stat_name = i)
   })
 
@@ -186,9 +186,9 @@ mt_plots_multstats_heatmap <- function(D,
   # NTS: add option to convert to ggplot
 
   # add status information & plot
-  funargs <- maplet:::mti_funargs()
-  D %<>% 
-    maplet:::mti_generate_result(
+  funargs <- mti_funargs()
+  D %<>%
+    mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("Pheatmap of stat results.\n Colors represent (sign(statistic) * -log10(p.adj)))"),
       output = list(re)
