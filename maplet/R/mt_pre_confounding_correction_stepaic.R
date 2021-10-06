@@ -33,7 +33,7 @@ mt_pre_confounding_correction_stepaic <- function(D, cols_to_correct, n_cores = 
     length(which(is.na(x)))!=length(x)) %>% which()
   # how many have no covariate information at all?
   rem <- nrow(Y) - length(non_na)
-  if(rem > 0) warning(sprintf("%d samples with no covariate info were removed!", rem))
+  if(rem > 0) mti_logwarning(sprintf("%d samples with no covariate info were removed!", rem))
 
   #######  exclude the covariates with constant values for all patients
   noNA <- function(x){x <- x[!is.na(x) & x!="NA" & x!=""];x}
@@ -48,7 +48,7 @@ mt_pre_confounding_correction_stepaic <- function(D, cols_to_correct, n_cores = 
   if(length(cols_to_exclude)>0){
     cols_to_correct <- cols_to_correct[which(cols_to_correct%in%cols_to_exclude==F)]
     cols_to_exclude <- toString(cols_to_exclude)
-    warning(sprintf("Covariates in column numbers %s with constant values were removed from correction!", cols_to_exclude))
+    mti_logwarning(sprintf("Covariates in column numbers %s with constant values were removed from correction!", cols_to_exclude))
   }
 
   if(length(cols_to_correct)<1) stop("No covariates left to correct for!")

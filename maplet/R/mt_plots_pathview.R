@@ -274,7 +274,7 @@ mt_plots_pathview <- function(D,
         names(pw_names) <- gsub(":", "", names(pw_names))
         pw <- pw_gene
       } else {
-        warning("Filtering returned an empty matrix")
+        mti_logwarning("Filtering returned an empty matrix")
         pw <- list()
         pw$pathway <- NULL
         gene_data <- NULL
@@ -321,7 +321,7 @@ mt_plots_pathview <- function(D,
         names(pw_names) <- gsub(":", "", names(pw_names))
         pw <- pw_met
       } else {
-        warning("Filtering returned an empty matrix")
+        mti_logwarning("Filtering returned an empty matrix")
         pw <- list()
         pw$pathway <- NULL
         cpd_data <- NULL
@@ -399,7 +399,7 @@ mt_plots_pathview <- function(D,
 
     if(!missing(n_pathways)) {
       if(n_pathways>length(pathway_id))
-        warning(sprintf("n.pathway is %i, but there are only %i pathways, so %i pathways will be used", n_pathways, length(pathway_id), length(pathway_id)))
+        mti_logwarning(sprintf("n.pathway is %i, but there are only %i pathways, so %i pathways will be used", n_pathways, length(pathway_id), length(pathway_id)))
       pathway_id <- pathway_id[1:min(n_pathways,length(pathway_id))]
       pw_names <- pw_names[1:min(n_pathways,length(pathway_id))]
     }

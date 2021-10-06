@@ -74,7 +74,7 @@ mt_anno_xls <-function(D,
     if (any(is.na(m))) {
       msg <- sprintf("The following sample IDs could not be found in the existing data matrix: %s",paste0(df[[data_id_col]][is.na(m)],collapse=","))
       if (no_map_err) stop(msg)
-      # else warning(msg)
+      # else mti_logwarning(msg)
     }
     # check no annotations are duplicated
     if(any(duplicated(df[!is.na(m),anno_id_col]))) stop(glue::glue("The ID column '{anno_id_col}' of the annotation data frame contains duplicated values."))
@@ -100,15 +100,15 @@ mt_anno_xls <-function(D,
     # ensure the data_id_col column exists
     if (!(data_id_col %in% colnames(rowData(D)))) stop(glue::glue("ID column '{data_id_col}' does not exist in current feature annotations of SE"))
     # ensure no columns in annotation df already exist in rowData
-    anno_col_names <- df %>% select(-one_of(anno_id_col)) %>% colnames()
-    data_col_names <- rowData(D) %>% as.data.frame() %>% select(-one_of(data_id_col)) %>% colnames()
+    anno_col_names <- df %>% dplyr::select(-dplyr::one_of(anno_id_col)) %>% colnames()
+    data_col_names <- rowData(D) %>% as.data.frame() %>% dplyr::select(-dplyr::one_of(data_id_col)) %>% colnames()
     if(any(anno_col_names %in% data_col_names)) stop("Annotation column names already exist in rowData.")
     # check that all features are found in the $name column of the existing dataset
     m <- match(df[[anno_id_col]], rowData(D)[[data_id_col]])
     if (any(is.na(m))) {
       msg <- sprintf("The following feature IDs could not be found in the existing data matrix: %s",paste0(df[[data_id_col]][is.na(m)],collapse=","))
       if (no_map_err) stop(msg)
-      # else warning(msg)
+      # else mti_logwarning(msg)
     }
     # check no annotations are duplicated
     if(any(duplicated(df[!is.na(m),anno_id_col]))) stop(glue::glue("The ID column '{anno_id_col}' of the annotation data frame contains duplicated values."))

@@ -138,7 +138,7 @@ mt_load_metabolon_lipidomics <- function(D, file, sheet_list) {
     for (i in 2:length(sheet_list)) {
       # throw a warning if sample annotations are different across data sheets
       if(any(colnames(xx[[sheet_list[1]]]$sampleinfo)!=colnames(xx[[sheet_list[i]]]$sampleinfo))) {
-        warning(sprintf("The sample annotations of %s and %s are not the same. Sample annotations from %s used.", sheet_list[1], sheet_list[i], sheet_list[1]))
+        mti_logwarning(sprintf("The sample annotations of %s and %s are not the same. Sample annotations from %s used.", sheet_list[1], sheet_list[i], sheet_list[1]))
       }
     }
   }

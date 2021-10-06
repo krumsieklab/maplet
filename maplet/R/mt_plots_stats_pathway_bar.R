@@ -207,11 +207,11 @@ mt_plots_stats_pathway_bar <- function(D,
             data_plot$pathway_name[which(is.na(data_plot$pathway_name))] <- "Unknown"
           }
           # substitute codes for names and remove extra column
-          data_plot %<>% 
+          data_plot %<>%
             dplyr::mutate(name=pathway_name) %>%
             dplyr::select(-pathway_name)
         } else{
-          warning(sprintf("%s field not found in the metadata",group_col))
+          mti_logwarning(sprintf("%s field not found in the metadata",group_col))
         }
       }
       # create labels for plotting
@@ -347,9 +347,9 @@ mt_plots_stats_pathway_bar <- function(D,
   }
 
   ## add status information & plot
-  funargs <- maplet:::mti_funargs()
+  funargs <- mti_funargs()
   D %<>% 
-    maplet:::mti_generate_result(
+    mti_generate_result(
       funargs = funargs,
       logtxt = ifelse(exists("stat_list"), sprintf("bar plot for comparison %s, by %s, filtered for %s, using %s", paste(stat_list,collapse = ", "), group_col, gsub("~", "", rlang::expr_text(enquo(feat_filter))), y_scale),
                       sprintf("bar plot by %s using %s", group_col, y_scale)),
