@@ -12,28 +12,31 @@ mt_anno_class(D, anno_type, col_list, file, sheet)
 \item{anno_type}{Either "samples" (colData) or "features" (rowData).}
 
 \item{col_list}{Named list of column names, from either colData or rowData, with column names as list name and class type as value.
-For example, list(samples="factor", age="numeric").}
+For example, list(samples="character", age="numeric", diagnosis="factor").}
 
-\item{file}{Name of excel file containing two columns: "Column Name" for column names and "Class" for class types.}
+\item{file}{Name of excel file containing two columns: "Column_Name" for column names and "Class" for class types.}
 
-\item{sheet}{Name of excel sheet containing column names ("Column Name") and class types ("Class"). Function will crash if incorrect
-column names are used.}
+\item{sheet}{Name of excel sheet containing column names ("Column_Name") and class types ("Class"). Function will crash if these
+names are not provided for the two columns.}
 }
 \value{
-colData or rowData: Changes the class type of the column.
+colData or rowData: Changes the class type of the column(s).
 }
 \description{
-Uses the lapply/sapply function to convert selected feature or sample annotation columns given an associated list of desired class 
+Uses the lapply/sapply function to convert selected feature or sample annotation columns given an associated list of desired class
 types. Column name / class type pairs can be provided one of two ways: (1) provide a named list where the names are the column names
-and the values are the class type, (2) provide an excel file and sheet with column names in a column called "Column Name" and class
-types are in a column called "Class". Can only use one method at a time - will crash if values provided for each of the parameters.
+and the values are the class type, (2) provide an excel file and sheet with column names in a column called "Column_Name" and class
+types in a column called "Class". Can only use one method at a time - will crash if values provided for each of the parameters.
 }
 \examples{
  \dontrun{... \%>\%
- # ensure factor for casecontrol variable
- mt_anno_apply(anno_type='samples',
-               col_name='casecontrol',
-               fun=as.factor) \%>\%
+ # set data type for sample annotation columns
+ mt_anno_class(anno_type='samples',
+               col_list=list(samples="character", age="numeric", diagnosis="factor")) \%>\%
+ # set data type for feature annotation columns
+ mt_anno_class(anno_type='features',
+               file = "Annotation_Data_Types.xlsx",
+               sheet = "Feature_Annotations") \%>\%
  ...}
 
 }
