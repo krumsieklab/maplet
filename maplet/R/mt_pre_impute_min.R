@@ -34,11 +34,11 @@ mt_pre_impute_min <- function(D, verbose=F) {
   all_nas <- length(which(apply(df,1,function(x) all(is.na(x)))))
   # impute
   df = apply(df, 1, function(x) {x[is.na(x)] <-  my_min(x); x} ) %>% t()
-  assay(D) = df
+  assay(D, withDimnames = F) = df
 
   # add status information
   funargs <- mti_funargs()
-  D %<>% 
+  D %<>%
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf('imputed via minimum value, %d features with all NAs, returned as NAs', all_nas)
