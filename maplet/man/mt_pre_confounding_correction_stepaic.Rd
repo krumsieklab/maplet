@@ -4,12 +4,19 @@
 \alias{mt_pre_confounding_correction_stepaic}
 \title{Confounding correction using stepwise AIC}
 \usage{
-mt_pre_confounding_correction_stepaic(D, cols_to_correct, n_cores = 1)
+mt_pre_confounding_correction_stepaic(
+  D,
+  cols_to_correct,
+  cols_to_exclude = NULL,
+  n_cores = 1
+)
 }
 \arguments{
 \item{D}{\code{SummarizedExperiment} input.}
 
-\item{cols_to_correct}{Vector of column numbers from colData to correct for.}
+\item{cols_to_correct}{column names from colData to correct for.}
+
+\item{cols_to_exclude}{optional, column names from colData to exclude for correction.}
 
 \item{n_cores}{Number of cores to use in parallelization. Default: 1.}
 }
