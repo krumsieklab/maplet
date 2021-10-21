@@ -4,7 +4,15 @@
 \alias{mt_load_xls}
 \title{Load data matrix from Excel file}
 \usage{
-mt_load_xls(D, file, sheet, samples_in_rows = T, id_col, zero_to_na = F)
+mt_load_xls(
+  D,
+  file,
+  sheet,
+  samples_in_rows = T,
+  id_col,
+  zero_to_na = F,
+  is_mt_write_se_xls_output = F
+)
 }
 \arguments{
 \item{D}{\code{SummarizedExperiment} input. Missing if first step in pipeline.}
@@ -19,6 +27,8 @@ mt_load_xls(D, file, sheet, samples_in_rows = T, id_col, zero_to_na = F)
 column. If not provided, the first column of the data frame will be used.}
 
 \item{zero_to_na}{Replace zeros by NAs? Default: F.}
+
+\item{is_mt_write_se_xls_output=F}{}
 }
 \value{
 If first step in pipeline, creates \code{SummarizedExperiment} object. Populates empty assay, colData, and rowData data frames.

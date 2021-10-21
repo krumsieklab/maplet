@@ -19,6 +19,7 @@
 #' @param id_col OPTIONAL. If samples_in_rows==T -> name of sample ID column. If samples_in_rows==F -> name of feature
 #'    column. If not provided, the first column of the data frame will be used.
 #' @param zero_to_na Replace zeros by NAs? Default: F.
+#' @param is_mt_write_se_xls_output=F
 #'
 #' @return If first step in pipeline, creates \code{SummarizedExperiment} object. Populates empty assay, colData, and rowData data frames.
 #'
@@ -43,87 +44,104 @@ mt_load_xls <- function(D,
                         sheet,
                         samples_in_rows = T,
                         id_col,
-                        zero_to_na=F) {
-
+                        zero_to_na=F, 
+                        is_mt_write_se_xls_output=F) {
+  
   # initialize result list
   result=list()
-
+  
   # validate arguments
   if (missing(file)) stop("file must be provided")
-  if (missing(sheet)) stop("sheet must be provided")
-
+  
   # get metadata from D if present
   if(!missing(D)){
     # validate SE
     if ("SummarizedExperiment" %in% class(D) == F) stop("D is not of class SummarizedExperiment")
     if (length(assays(D))!=0) stop("Passed SummarizedExperiment assay must be empty!")
-
     # get metadata
     result$meta <- metadata(D)
   }
-
-  # load excel sheet
-  df <- as.data.frame(readxl::read_excel(path=file,sheet=sheet,col_names=T))
-
-  # check that sample id_col column exists; if not, use first column
-  if (missing(id_col)){
-    i_id_col <- colnames(df)[1]
-  }else{
-    i_id_col <- id_col
+  
+  if(is_mt_write_se_xls_output){
+    df <- as.data.frame(readxl::read_excel(path=file,sheet='assay', col_names=T))
+    # now convert first column as rownames
+    df %<>% tibble::column_to_rownames(colnames(df)[1])
+    # construct assay
+    if (samples_in_rows) {
+      # need to transpose
+      assay <- t(df)
+    } else {
+      assay <- as.matrix(df)
+    }
+    metinfo <- as.data.frame(readxl::read_excel(path=file,sheet='rowData',col_names=T))
+    cd <- as.data.frame(readxl::read_excel(path=file,sheet='colData',col_names=T))
+    log_message <- glue::glue("loaded assay from maplet output file '{basename(file)}")
+    
+  } else{
+    if (missing(sheet)) stop("sheet must be provided")
+    # load excel sheet
+    df <- as.data.frame(readxl::read_excel(path=file,sheet=sheet,col_names=T))
+    
+    # check that sample id_col column exists; if not, use first column
+    if (missing(id_col)){
+      i_id_col <- colnames(df)[1]
+    }else{
+      i_id_col <- id_col
+    }
+    if (!(i_id_col %in% colnames(df))) stop(glue::glue("sample ID column '{i_id_col}' does not exist in '{basename(file)}, sheet '{sheet}'"))
+    # now convert to rownames
+    df %<>% tibble::column_to_rownames(i_id_col)
+    
+    # construct assay
+    if (samples_in_rows) {
+      # need to transpose
+      assay = t(df)
+    } else {
+      assay = as.matrix(df)
+    }
+    
+    # ensure that all columns are numeric
+    rn <- rownames(assay)
+    assay <- apply(assay,2,as.numeric)
+    rownames(assay) <- rn
+    
+    # zeros to NAs?
+    if (zero_to_na) assay[assay==0] <- NA
+    
+    # save original names as feature annotation, and ensure valid R name rownames
+    metinfo <- data.frame(name=rownames(assay))
+    rownames(assay) %<>% make.names()
+    
+    # save column names as sample annotation
+    cd <- data.frame(as.character(colnames(assay)))
+    if(missing(id_col)){
+      colnames(cd)[1] <- 'sample'
+    }else{
+      colnames(cd)[1] <- ifelse(samples_in_rows,id_col,'sample')
+    }
+    log_message <- glue::glue("loaded assay from Excel file '{basename(file)}, sheet '{sheet}'")
   }
-  if (!(i_id_col %in% colnames(df))) stop(glue::glue("sample ID column '{i_id_col}' does not exist in '{basename(file)}, sheet '{sheet}'"))
-  # now convert to rownames
-  df %<>% tibble::column_to_rownames(i_id_col)
-
-  # construct assay
-  if (samples_in_rows) {
-    # need to transpose
-    assay = t(df)
-  } else {
-    assay = as.matrix(df)
-  }
-
-  # save original names as feature annotation, and ensure valid R name rownames
-  metinfo = data.frame(name=rownames(assay))
-  rownames(assay) %<>% make.names()
-
-  # ensure that all columns are numeric
-  rn <- rownames(assay)
-  assay <- apply(assay,2,as.numeric)
-  rownames(assay) <- rn
-
-  # zeros to NAs?
-  if (zero_to_na) assay[assay==0] <- NA
-
-  # save column names as sample annotation
-  cd <- data.frame(as.character(colnames(assay)))
-  if(missing(id_col)){
-    colnames(cd)[1] <- 'sample'
-  }else{
-    colnames(cd)[1] <- ifelse(samples_in_rows,id_col,'sample')
-  }
-
   # construct SummarizedExperiment
   D <- SummarizedExperiment(assay = assay,
                             rowData = metinfo,
                             colData = cd,
                             metadata = list(sessionInfo=utils::sessionInfo()))
-
+  
   # add original metadata if exists
   if (!is.null(result$meta$results)) metadata(D)$results <- result$meta$results
   if (!is.null(result$meta$settings)) metadata(D)$settings <- result$meta$settings
-
-
+  
+  
   # add status information
   funargs <- mti_funargs()
   D %<>% 
     mti_generate_result(
       funargs = funargs,
-      logtxt = glue::glue("loaded assay from Excel file '{basename(file)}, sheet '{sheet}'")
+      logtxt = log_message
     )
-
+  
   # return
   D
-
+  
 }
 
