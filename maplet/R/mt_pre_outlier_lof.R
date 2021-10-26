@@ -30,7 +30,7 @@ mt_pre_outlier_lof <- function(D,
   lof <- bigutilsr::LOF(df, seq_k = seq_k)
   
   # detect outliers based on departure from histogram
-  out_idx <- which(lof>hist_out(lof)$lim[2])
+  out_idx <- which(lof>bigutilsr::hist_out(lof)$lim[2])
   # remove any detected outliers
   if(length(out_idx)>0) D <- D[, -out_idx]
   
