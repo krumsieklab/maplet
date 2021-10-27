@@ -4,7 +4,7 @@
 maplet is an R package for statistical data analysis with a special focus on metabolomics datasets. It allows users to create self-contained analytical pipelines. The toolbox builds upon the bioconductor package <a href="https://bioconductor.org/packages/release/bioc/vignettes/SummarizedExperiment/inst/doc/SummarizedExperiment.html">SummarizedExperiment (SE)</a>, which serves as a central repository for each pipeline’s data, analysis steps, and results. maplet provides a suite of functions for interacting with this container including but not limited to data loading, annotation, statistical analysis, visualization, and reporting. maplet is designed to work with a pipe operator - either the popular %>% operator from the <a href="https://magrittr.tidyverse.org/">magrittr</a> package or the recently introduced |> from base R. This operator allows for smooth connections between pipeline steps, without the need for temporary variables or multiple assignments. The combination of these elements allows for the creation of pipelines which are simple to follow, highly modular, and easily reproducible.
 
 ## Reference
-Chetnik et al. "maplet: An extensible for modular and reproducible omics pipelines". arXiv, 2021. [Link to publication.](https://arxiv.org/abs/2105.04305)
+Chetnik et al. "maplet: An extensible for modular and reproducible omics pipelines". *Bioinformatics*, 2021. [Link to publication.](https://academic.oup.com/bioinformatics/advance-article/doi/10.1093/bioinformatics/btab741/6409851)
 
 ## Installation
 The latest stable version of maplet can be easily installed using the following command:
