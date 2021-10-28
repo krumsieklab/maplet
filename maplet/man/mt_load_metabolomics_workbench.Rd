@@ -29,7 +29,10 @@ colData, and rowData data frames.
 }
 \description{
 Load SummarizedExperiment data frames using the mwtab file provided by studies on the metabolomics
-data repository Metabolomics Workbench.\n\n Because of a formatting issue in the mwtab json objects
+data repository Metabolomics Workbench.
+
+Because of a formatting issue in the mwtab json objects, analysis IDs are required to distinguish
+datasets in studies that provide multiple datasets.
 }
 \examples{
 \dontrun{D <-

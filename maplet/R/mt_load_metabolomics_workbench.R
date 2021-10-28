@@ -1,7 +1,10 @@
 #' Loader for Metabolomics Workbench Studies
 #'
-#' Load SummarizedExperiment data frames using the mwtab file provided by studies on the metabolomics
-#' data repository Metabolomics Workbench.\n\n Because of a formatting issue in the mwtab json objects
+#' @description Load SummarizedExperiment data frames using the mwtab file provided by studies on the metabolomics
+#' data repository Metabolomics Workbench.
+#'
+#' @description Because of a formatting issue in the mwtab json objects, analysis IDs are required to distinguish
+#' datasets in studies that provide multiple datasets.
 #'
 #'
 #' @param D \code{SummarizedExperiment} input. OPTIONAL.
