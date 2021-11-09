@@ -97,6 +97,7 @@ mt_plots_pathview <- function(D,
                               ...) {
 
   requireNamespace(pathview)
+  data("bods", package = "pathview")
 
   # get argument names from dots
   n <- sapply(as.list(substitute(list(...)))[-1L], deparse)
@@ -410,11 +411,14 @@ mt_plots_pathview <- function(D,
     lapply(1:length(pathway_id), function(x) {
       suppressMessages(
         pv.out <- pathview::pathview(gene.data = gene_data, cpd.data = cpd_data, pathway.id = pathway_id[x], kegg.dir = save.path,
-                                     cpd.idtype = cpd_idtype, gene.idtype = gene_idtype, limit = limit, low = low, 
+                                     cpd.idtype = cpd_idtype, gene.idtype = gene_idtype, limit = limit, low = low,
                                      mid = mid, high = high, same.layer = same_layer, out.suffix = out_suffix, ...)
       )
-      # add pathway rank and name to filename
-      if(add_pwname_suffix) {
+      # if pathview file not available, pathview returns 0; if pv.out is a double, the file download failed
+      if(typeof(pv.out)=="double"){
+        mti_logwarning(glue::glue("Download of files for {pathway_id[x]} failed! This pathway may not exist!"))
+      }else if(add_pwname_suffix) {
+        # add pathway rank and name to filename
         fname <- list.files(".",pattern=pathway_id[x])
         # isolate pathway name from filename
         m <- pw_names[names(pw_names)==substr(fname[length(fname)], 1, 8)]
