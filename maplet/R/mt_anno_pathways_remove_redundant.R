@@ -44,7 +44,7 @@ mt_anno_pathways_remove_redundant <- function(D, feat_col, pw_col ) {
     row_data %>%
     dplyr::filter(!is.na(feat_col),
            pw_col != "NULL") %>%
-    tidyr::unnest(pw_col) %>%
+    tidyr::unnest_longer(pw_col) %>%
     dplyr::group_by(pw_col) %>%
     dplyr::arrange(feat_col) %>%
     dplyr::mutate(feat_cols = stringr::str_c(feat_col, collapse = "|")) %>%
