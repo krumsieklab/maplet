@@ -9,7 +9,7 @@ Chetnik et al. "maplet: An extensible for modular and reproducible omics pipelin
 ## Installation
 The latest stable version of maplet can be easily installed using the following command:
 ```{r}
-devtools::install_github(repo="krumsieklab/maplet@v1.1.0", subdir="maplet")
+devtools::install_github(repo="krumsieklab/maplet@v1.1.1", subdir="maplet")
 ```
 
 To install from the latest commit:
