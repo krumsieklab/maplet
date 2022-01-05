@@ -1,9 +1,10 @@
 #' Filter features
 #'
-#' Filters features according to an expression. Expression can access entries of rowData.
+#' Filters features according to an expression. Expression can access entries of rowData. Note: the filtering
+#' expression selects which features to KEEP.
 #'
 #' @param D \code{SummarizedExperiment} input.
-#' @param filter Logical expression. Can use columns from rowData.
+#' @param filter Logical expression that selects which features to keep. Can use columns from rowData.
 #'
 #' @return assay: Filtered features (rows) removed.
 #' @return rowData: Filtered features removed.
@@ -32,7 +33,7 @@ mt_modify_filter_features <- function(D, filter){
 
     ## add status information & plot
     funargs <- mti_funargs()
-    D %<>% 
+    D %<>%
                   mti_generate_result(
                       funargs = funargs,
                       logtxt = sprintf("Filter features: %s",  as.character(filter_q)),
@@ -44,10 +45,11 @@ mt_modify_filter_features <- function(D, filter){
 
 #' Filter samples
 #'
-#' Filters samples according to an expression. Expression can access entries of colData.
+#' Filters samples according to an expression. Expression can access entries of colData. Note: the filtering
+#' expression selects which samples to KEEP.
 #'
 #' @param D \code{SummarizedExperiment} input.
-#' @param filter Logical expression. Can use columns from colData.
+#' @param filter Logical expression that selects which samples to keep. Can use columns from colData.
 #'
 #' @return assay: Filtered samples (columns) removed.
 #' @return colData: Filtered samples removed.
@@ -77,7 +79,7 @@ mt_modify_filter_samples <- function(D, filter){
 
     ## add status information & plot
     funargs <- mti_funargs()
-    D %<>% 
+    D %<>%
                   mti_generate_result(
                       funargs = funargs,
                       logtxt = sprintf("Filter samples: %s",  as.character(filter_q)),

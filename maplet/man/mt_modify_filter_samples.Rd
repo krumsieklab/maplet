@@ -9,7 +9,7 @@ mt_modify_filter_samples(D, filter)
 \arguments{
 \item{D}{\code{SummarizedExperiment} input.}
 
-\item{filter}{Logical expression. Can use columns from colData.}
+\item{filter}{Logical expression that selects which samples to keep. Can use columns from colData.}
 }
 \value{
 assay: Filtered samples (columns) removed.
@@ -17,7 +17,8 @@ assay: Filtered samples (columns) removed.
 colData: Filtered samples removed.
 }
 \description{
-Filters samples according to an expression. Expression can access entries of colData.
+Filters samples according to an expression. Expression can access entries of colData. Note: the filtering
+expression selects which samples to KEEP.
 }
 \examples{
 # filter to two specific groups of samples
