@@ -4,12 +4,15 @@
 \alias{mt_write_se_xls}
 \title{Output assay, colData and rowData into an Excel file}
 \usage{
-mt_write_se_xls(D, file)
+mt_write_se_xls(D, file, keep_list_col = FALSE)
 }
 \arguments{
 \item{D}{\code{SummarizedExperiment} input.}
 
-\item{file}{Output filename to write to.}
+\item{file}{Output file name to write to.}
+
+\item{keep_list_col}{Whether to keep rowData columns containing list values. If TRUE, convert each list to a
+string with values separated by "|". If FALSE, the column is removed. Default: FALSE.}
 }
 \value{
 Does not change the \code{SummarizedExperiment} object.
@@ -22,5 +25,5 @@ Exports the current \code{SummarizedExperiment} (not the metadata) to an Excel f
 
 }
 \author{
-JK
+JK, KC
 }
