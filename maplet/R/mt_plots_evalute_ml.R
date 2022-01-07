@@ -1,19 +1,20 @@
 #' Plot Evaluation Measures for Repeated Machine Learning Predictions
 #'
 #' This function creates plots of evaluation measures for repeated machine learning predictions. The types of plots
-#' created vary depending on the cross-validation / sampling method used.Below is a list of plot types generated
+#' created vary depending on the cross-validation / sampling method used. Below is a list of plot types generated
 #' for each method:
 #' \itemize{
 #'    \item CV
 #'    \itemize{
-#'       \item All confusion matrix
-#'       \item confusion matrix
+#'       \item Confusion matrix - all indices
+#'       \item Confusion matrices per fold (if per_fold_plots = T)
+#'       \item
 #'    }
 #' }
 #'
 #'
 #' @param D \code{SummarizedExperiment} input.
-#' @param ml_name Name under which the machine learning results are stored, must be unique to all other machine
+#' @param ml_name Name under which the machine learning results are stored; must be unique to all other machine
 #'    learning results.
 #' @param plot_measures A vector of measures to include; can be one or more of the following: spec, sens, f1,
 #'    acc, and/or ppv. Default: c("spec", "sens", "ppv").
@@ -26,7 +27,7 @@
 #'
 #' @examples
 #' \dontrun{
-#'
+#'   mt_plots_evaluate_ml(ml_name="mci_lasso", plot_measures = c("spec", "sens", "ppv", "f1"), per_fold_plots=F)
 #' }
 #'
 #' @author KC
