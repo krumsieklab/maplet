@@ -40,6 +40,9 @@ If first step in pipeline, creates \code{SummarizedExperiment} object. Populates
 colData, and rowData data frames.
 }
 \description{
+NOTE: The package metabolighteR is no longer supported on CRAN. Until this function is updated,
+you must manually install an archived version of this package in order to use this function.
+
 Load SummarizedExperiment data frames using the metabolighteR package to retrieve publicly available
 data files from the metabolomics data repository Metabolights. If cache=TRUE, the assembled
 SummarizedExperiment object (with variable name "D_cache") will be saved to a local directory. This loader

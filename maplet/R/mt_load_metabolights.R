@@ -1,6 +1,9 @@
 #' Loader for MetaboLights Studies
 #'
-#' Load SummarizedExperiment data frames using the metabolighteR package to retrieve publicly available
+#' @description NOTE: The package metabolighteR is no longer supported on CRAN. Until this function is updated,
+#' you must manually install an archived version of this package in order to use this function.
+#'
+#' @description Load SummarizedExperiment data frames using the metabolighteR package to retrieve publicly available
 #' data files from the metabolomics data repository Metabolights. If cache=TRUE, the assembled
 #' SummarizedExperiment object (with variable name "D_cache") will be saved to a local directory. This loader
 #' will always check for the presence of a cached file corresponding to the study ID and ion mode (optional)
@@ -44,6 +47,11 @@ mt_load_metabolights <- function(D,
                                  cache=FALSE,
                                  cache_file){
 
+  # check that metabolighteR is installed
+  if (!requireNamespace("metabolighteR", quietly = TRUE)) {
+    stop("Package metabolighteR not required but not installed. Please install to use this function.")
+  }
+
   # validate arguments
   if(missing(study_id)) stop("Value must be provided for argument \'study_id\'.")
   if(grepl("\\bMTBLS\\d+\\b", study_id)==FALSE) stop("Argument \'study_id\' must be of the form \'MTBLS#\'.")
@@ -68,6 +76,7 @@ mt_load_metabolights <- function(D,
     D <- readRDS(cache_file)
   # download data from Metabolights
   }else{
+
     # check met_file and samp_file provided
     studyFileList <- metabolighteR::get_study_files(study_id)
     if(missing(met_file) | missing(samp_file)) stop("To download data, values must be provided for both \'met_file\' and \'samp_file\'.")
@@ -77,6 +86,7 @@ mt_load_metabolights <- function(D,
     # download data files
     mti_logstatus("Downloading data from MetaboLights...")
     # metabolite table - assay + rowData
+
     met_tab <- metabolighteR::download_study_file(study_id, met_file) %>% suppressMessages()
 
     # sample table - colData

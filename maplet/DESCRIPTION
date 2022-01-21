@@ -1,7 +1,7 @@
 Package: maplet
 Type: Package
 Title: Metabolomics Anaysis PipeLinE Toolbox
-Version: 1.1.1
+Version: 1.1.2
 Authors@R: c(
     person("Kelsey", "Chetnik", email="kpc4002@med.cornell.edu", role=c("aut","cre")),
     person("Elisa", "Benedetti", role=c("aut")),
@@ -54,7 +54,6 @@ Imports:
     MASS,
     MatrixEQTL,
     matrixStats,
-    metabolighteR,
     network,
     openxlsx,
     pathview,
@@ -87,6 +86,7 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
 Suggests: 
-    knitr
+    knitr,
+    metabolighteR
 VignetteBuilder: knitr
 biocViews: WorkflowStep, Metabolomics
