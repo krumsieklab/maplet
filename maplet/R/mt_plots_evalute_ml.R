@@ -84,14 +84,15 @@ mt_plots_ml_evaluate <- function(D,
                                                         per_fold_plots = per_fold_plots, labels=labels)
   # dot plots include: AUC per fold, Evaluation Measure per fold, Folds per Evaluation Measure
   dot_plots <- make_dot_plots(df = folds_df, num_folds=num_folds, all_unique_samples = all_unique_samples,
-                              plot_measures = plot_measures)
+                              plot_measures = plot_measures, cutoff = cutoff)
   # append lists
   plots <- c(confusion_matrix_plots, dot_plots)
 
   # only produced when indices are unique
   if(all_unique_samples){
     # threshold plots include:
-    thresh_plots <- make_threshold_plots(df = folds_df, num_folds = num_folds, plot_measures = plot_measures)
+    thresh_plots <- make_threshold_plots(df = folds_df, num_folds = num_folds, plot_measures = plot_measures,
+                                         cutoff = cutoff)
     plots <- c(plots, thresh_plots)
   }
 
@@ -170,7 +171,7 @@ make_confusion_matrix_plots <- function(df, num_folds, per_fold_plots, labels){
 }
 
 
-make_dot_plots <- function(df, num_folds,  all_unique_samples, plot_measures){
+make_dot_plots <- function(df, num_folds,  all_unique_samples, plot_measures, cutoff){
 
   ### ------ Format Data ------ ###
   # for each fold, calculate the six evaluation measures
@@ -269,7 +270,7 @@ make_dot_plots <- function(df, num_folds,  all_unique_samples, plot_measures){
 }
 
 
-make_threshold_plots <- function(df, num_folds, plot_measures){
+make_threshold_plots <- function(df, num_folds, plot_measures, cutoff){
 
   thresh_plots <- list()
 
@@ -320,19 +321,19 @@ make_threshold_plots <- function(df, num_folds, plot_measures){
       reshape2::melt(id=c("thresholds", "Fold"))
   })
 
-  em_plots <- lapply(1:num_folds, function(i, em_list = em_per_fold){
-
-    em_df <- em_list[[i]]
-    p <- ggplot(em_df, aes(x=thresholds, y=value, color=variable)) + geom_line(size=2) +
-      xlab("Thresholds") +
-      ylab("Evaluation Measure Values") +
-      labs(color='Measures') +
-      ggtitle(paste0("Evaluation Measures: Fold ", i)) +
-      geom_vline(xintercept = cutoff) +
-      theme(text = element_text(size=15))
-
-  })
-  thresh_plots$measures_per_fold <- em_plots
+  # em_plots <- lapply(1:num_folds, function(i, em_list = em_per_fold){
+  #
+  #   em_df <- em_list[[i]]
+  #   p <- ggplot(em_df, aes(x=thresholds, y=value, color=variable)) + geom_line(size=2) +
+  #     xlab("Thresholds") +
+  #     ylab("Evaluation Measure Values") +
+  #     labs(color='Measures') +
+  #     ggtitle(paste0("Evaluation Measures: Fold ", i)) +
+  #     geom_vline(xintercept = cutoff) +
+  #     theme(text = element_text(size=15))
+  #
+  # })
+  # thresh_plots$measures_per_fold <- em_plots
 
   # (4) Evaluation Measures Per Fold - Faceted
   em_all <- do.call(rbind.data.frame, em_per_fold)
@@ -344,8 +345,6 @@ make_threshold_plots <- function(df, num_folds, plot_measures){
     geom_vline(xintercept = cutoff) +
     theme(text = element_text(size=15)) +
     facet_wrap(~Fold)
-
-  p
 
 
   thresh_plots$facet_em_line <- p
