@@ -9,23 +9,13 @@ mt_load_olink(D, file)
 \arguments{
 \item{D}{\code{SummarizedExperiment} input. Missing if first step in pipeline.}
 
-\item{file}{Name of NPX file exported from NPX manger.}
+\item{file}{Name of Excel file exported from NPX manger.}
 }
 \value{
 If first step in pipeline, creates \code{SummarizedExperiment} object. Populates empty assay (note: 2^NPX), colData, and rowData data frames.
 }
 \description{
 Loads data from an Olink-format Excel file.
-Uses Olink's R code read_NPX taken from
-\href{https://github.com/Olink-Proteomics/OlinkRPackage/tree/master/OlinkAnalyze}{https://github.com/Olink-Proteomics/Olink
-RPackage/tree/master/OlinkAnalyze}.
-
-In case the Olink file is not in XLSX format, but CSV or TSV text format:
-\itemize{
-   \item you may need to remove all Ctrl data columns
-   \item save file as xlsx (make sure to rename SEPT9 back from Excel date)
-   \item don't keep the Excel file open while running R - this throws a file access denied error
-}
 }
 \examples{
 \dontrun{D <-
@@ -35,5 +25,5 @@ In case the Olink file is not in XLSX format, but CSV or TSV text format:
 
 }
 \author{
-KS
+RB, KC
 }
