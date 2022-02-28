@@ -33,7 +33,7 @@ mt_load_metabolon_v2 <- function(D, file, data_sheet, met_sheet, samp_sheet) {
   if (missing(data_sheet)) stop("sheet must be provided.")
   if (missing(met_sheet)) stop("met_sheet must be provided.")
   if (missing(samp_sheet)) stop("samp_sheet must be provided.")
-  
+
 
   # get metadata from D if present
   if(!missing(D)){
@@ -52,7 +52,7 @@ mt_load_metabolon_v2 <- function(D, file, data_sheet, met_sheet, samp_sheet) {
   met_info = readxl::read_excel(path=file, sheet=met_sheet, col_names = T)
   sample_info = readxl::read_excel(path=file, sheet=samp_sheet, col_names = T)
 
-  result$data <- raw %>% select(-all_of(cols2discard))
+  result$data <- raw %>% select(-any_of(cols2discard))
   result$metinfo <- met_info[match(names(result$data), met_info$CHEM_ID), ]
   result$sampleinfo <- sample_info[match(raw$PARENT_SAMPLE_NAME, sample_info$PARENT_SAMPLE_NAME), ]
 
@@ -92,7 +92,7 @@ mt_load_metabolon_v2 <- function(D, file, data_sheet, met_sheet, samp_sheet) {
 
   # add status information
   funargs <- mti_funargs()
-  D %<>% 
+  D %<>%
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("loaded Metabolon file: %s, sheets: %s, %s, %s",
