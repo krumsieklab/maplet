@@ -57,7 +57,7 @@ mt_plots_stats_pathway_bar <- function(D,
   # get argument names from dots
   n <- sapply(as.list(substitute(list(...)))[-1L], deparse)
   dot_args <- names(n)
-  
+
   # check for defunct argument names
   if ("stat_name" %in% dot_args) stop("You used the old MT naming convention stat_name. Should be: stat_list.")
   if ("metab_filter" %in% dot_args) stop("You used the old MT naming convention metab_filter. Should be: feat_filter.")
@@ -68,7 +68,7 @@ mt_plots_stats_pathway_bar <- function(D,
   if ("assoc_sign" %in% dot_args) stop("You used the old MT naming convention assoc_sign. Should be: assoc_sign_col.")
   if ("keep.unmapped" %in% dot_args) stop("You used the old MT naming convention keep.unmapped. Should be: keep_unmapped.")
   if ("output.file" %in% dot_args) stop("You used the old MT naming convention output.file. Should be: outfile.")
-  
+
   ## check input
   stopifnot("SummarizedExperiment" %in% class(D))
   if(missing(stat_list) & !missing(feat_filter))
@@ -80,7 +80,7 @@ mt_plots_stats_pathway_bar <- function(D,
   if(!is.null(color_col))
     if(!(color_col %in% colnames(rowData(D))))
       stop(sprintf("color_col column '%s' not found in rowData", color_col))
-  
+
   ## rowData
   rd <- rowData(D) %>%
     as.data.frame() %>%
@@ -174,14 +174,14 @@ mt_plots_stats_pathway_bar <- function(D,
       }
 
       # create dictionary between group_col and color_col variables
-      dict <- rd %>% dplyr::select(!!sym(group_col),!!sym(color_col)) %>% tidyr::unnest(cols=c(group_col)) %>% as.data.frame()
+      dict <- rd %>% dplyr::select(!!sym(group_col),!!sym(color_col)) %>% tidyr::unnest_longer(col=group_col) %>% as.data.frame()
       dict <- dict[!duplicated(dict[[group_col]]),]
 
       # add color to data_plot
       data_plot <- data_plot %>%
         dplyr::left_join(dict, by=c("name"=group_col)) %>%
         dplyr::rename(color=sym(color_col))
-      
+
       # create annotation data
       anno <- data.frame(name = rep(rd$name, times=sapply(rd[[group_col]], length) %>% as.vector()),
                          var = rep(rd$var, times=sapply(rd[[group_col]], length) %>% as.vector()),
@@ -348,7 +348,7 @@ mt_plots_stats_pathway_bar <- function(D,
 
   ## add status information & plot
   funargs <- mti_funargs()
-  D %<>% 
+  D %<>%
     mti_generate_result(
       funargs = funargs,
       logtxt = ifelse(exists("stat_list"), sprintf("bar plot for comparison %s, by %s, filtered for %s, using %s", paste(stat_list,collapse = ", "), group_col, gsub("~", "", rlang::expr_text(enquo(feat_filter))), y_scale),
