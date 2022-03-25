@@ -57,7 +57,7 @@ mt_plots_stats_pathway_bar <- function(D,
   # get argument names from dots
   n <- sapply(as.list(substitute(list(...)))[-1L], deparse)
   dot_args <- names(n)
-  
+
   # check for defunct argument names
   if ("stat_name" %in% dot_args) stop("You used the old MT naming convention stat_name. Should be: stat_list.")
   if ("metab_filter" %in% dot_args) stop("You used the old MT naming convention metab_filter. Should be: feat_filter.")
@@ -68,7 +68,7 @@ mt_plots_stats_pathway_bar <- function(D,
   if ("assoc_sign" %in% dot_args) stop("You used the old MT naming convention assoc_sign. Should be: assoc_sign_col.")
   if ("keep.unmapped" %in% dot_args) stop("You used the old MT naming convention keep.unmapped. Should be: keep_unmapped.")
   if ("output.file" %in% dot_args) stop("You used the old MT naming convention output.file. Should be: outfile.")
-  
+
   ## check input
   stopifnot("SummarizedExperiment" %in% class(D))
   if(missing(stat_list) & !missing(feat_filter))
@@ -80,7 +80,7 @@ mt_plots_stats_pathway_bar <- function(D,
   if(!is.null(color_col))
     if(!(color_col %in% colnames(rowData(D))))
       stop(sprintf("color_col column '%s' not found in rowData", color_col))
-  
+
   ## rowData
   rd <- rowData(D) %>%
     as.data.frame() %>%
@@ -174,14 +174,14 @@ mt_plots_stats_pathway_bar <- function(D,
       }
 
       # create dictionary between group_col and color_col variables
-      dict <- rd %>% dplyr::select(!!sym(group_col),!!sym(color_col)) %>% tidyr::unnest(cols=c(group_col)) %>% as.data.frame()
+      dict <- rd %>% dplyr::select(!!sym(group_col),!!sym(color_col)) %>% tidyr::unnest_longer(col=group_col) %>% as.data.frame()
       dict <- dict[!duplicated(dict[[group_col]]),]
 
       # add color to data_plot
       data_plot <- data_plot %>%
         dplyr::left_join(dict, by=c("name"=group_col)) %>%
         dplyr::rename(color=sym(color_col))
-      
+
       # create annotation data
       anno <- data.frame(name = rep(rd$name, times=sapply(rd[[group_col]], length) %>% as.vector()),
                          var = rep(rd$var, times=sapply(rd[[group_col]], length) %>% as.vector()),
@@ -268,7 +268,7 @@ mt_plots_stats_pathway_bar <- function(D,
     p <- ggplot(data_plot, aes(label)) +
       (if("association" %in% colnames(data_plot)) {geom_bar(data = subset(data_plot, association == "positive"), aes(y = !!sym(y_scale), fill = color), stat = "identity", position = "dodge", color="black", size=0.4)}) +
       (if("association" %in% colnames(data_plot)) {geom_bar(data = subset(data_plot, association == "negative"), aes(y = -!!sym(y_scale), fill = color), stat = "identity", position = "dodge", color="black", size=0.4)} else{geom_bar(aes(x=label, y=!!sym(y_scale), fill=color), stat = "identity", color="black", size=0.4)}) +
-      (if(y_scale=="fraction") {ggtitle(sprintf("Fraction of pathway affected, %s", gsub("~", "", rlang::expr_text(dplyr::enquo(feat_filter)))))}else{ggtitle(sprintf("Number of hits per pathway, %s", gsub("~", "", rlang::expr_text(enquo(feat_filter)))))}) +
+      (if(y_scale=="fraction") {ggtitle(sprintf("Fraction of pathway affected, %s", gsub("~", "", rlang::expr_text(dplyr::enquo(feat_filter)))))}else{ggtitle(sprintf("Number of hits per pathway, %s", gsub("~", "", rlang::expr_text(dplyr::enquo(feat_filter)))))}) +
       (if(y_scale=="count" & "association" %in% colnames(data_plot)) {expand_limits(y=c(-max(data_plot$count, na.rm = T)*1.7, max(data_plot$count, na.rm = T)*1.7))}) +
       (if(y_scale=="count" & !("association" %in% colnames(data_plot))) {expand_limits(y=c(0, max(data_plot$count, na.rm = T)*1.7))}) +
       (if(y_scale=="fraction" & "association" %in% colnames(data_plot)) {expand_limits(y=c(-1, 1))}) +
@@ -335,7 +335,7 @@ mt_plots_stats_pathway_bar <- function(D,
       wb = openxlsx::createWorkbook()
       sheet = openxlsx::addWorksheet(wb, "Parameters")
       if(is.null(color_col)){color_col <- 'none'}
-      openxlsx::writeData(wb, sheet=sheet, list(comparisons = stat_list, feat_filter = gsub("~", "", rlang::expr_text(enquo(feat_filter))), group_col = group_col, coloredby = color_col))
+      openxlsx::writeData(wb, sheet=sheet, list(comparisons = stat_list, feat_filter = gsub("~", "", rlang::expr_text(dplyr::enquo(feat_filter))), group_col = group_col, coloredby = color_col))
       sheet = openxlsx::addWorksheet(wb, "AggregatedPathways")
       openxlsx::writeData(wb, sheet=sheet, data_plot, rowNames = F, colNames = T)
       sheet = openxlsx::addWorksheet(wb, "IndividualResults")
@@ -348,10 +348,10 @@ mt_plots_stats_pathway_bar <- function(D,
 
   ## add status information & plot
   funargs <- mti_funargs()
-  D %<>% 
+  D %<>%
     mti_generate_result(
       funargs = funargs,
-      logtxt = ifelse(exists("stat_list"), sprintf("bar plot for comparison %s, by %s, filtered for %s, using %s", paste(stat_list,collapse = ", "), group_col, gsub("~", "", rlang::expr_text(enquo(feat_filter))), y_scale),
+      logtxt = ifelse(exists("stat_list"), sprintf("bar plot for comparison %s, by %s, filtered for %s, using %s", paste(stat_list,collapse = ", "), group_col, gsub("~", "", rlang::expr_text(dplyr::enquo(feat_filter))), y_scale),
                       sprintf("bar plot by %s using %s", group_col, y_scale)),
       output = list(p),
       output2 = list(nr = nr, npancol = ncol, npanrow = nrow)
