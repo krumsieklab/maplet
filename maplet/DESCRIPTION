@@ -71,6 +71,7 @@ Imports:
     rmarkdown,
     S4Vectors,
     scales,
+    sgi,
     stringr,
     survival,
     sva,
