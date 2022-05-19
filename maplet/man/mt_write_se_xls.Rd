@@ -2,9 +2,14 @@
 % Please edit documentation in R/mt_write_se_xls.R
 \name{mt_write_se_xls}
 \alias{mt_write_se_xls}
-\title{Output assay, colData and rowData into an Excel file}
+\title{Output assay, rowData and colData into an Excel file}
 \usage{
-mt_write_se_xls(D, file, keep_list_col = FALSE)
+mt_write_se_xls(
+  D,
+  file,
+  keep_list_col = FALSE,
+  sheet_names = c("assay", "rowData", "colData")
+)
 }
 \arguments{
 \item{D}{\code{SummarizedExperiment} input.}
@@ -13,6 +18,9 @@ mt_write_se_xls(D, file, keep_list_col = FALSE)
 
 \item{keep_list_col}{Whether to keep rowData columns containing list values. If TRUE, convert each list to a
 string with values separated by "|". If FALSE, the column is removed. Default: FALSE.}
+
+\item{sheet_names}{Vector of names for sheets, in the following order: (1) assay, (2) rowData, and
+(3) colData. Default: c("assay", "rowData", "colData").}
 }
 \value{
 Does not change the \code{SummarizedExperiment} object.
@@ -21,7 +29,7 @@ Does not change the \code{SummarizedExperiment} object.
 Exports the current \code{SummarizedExperiment} (not the metadata) to an Excel file.
 }
 \examples{
-\dontrun{\%>\% mt_write_se_xls(file = "out.xlsx") \%>\%}
+\dontrun{\%>\% mt_write_se_xls(file = "out.xlsx", sheet_names = c("data", "metabolites", "samples")) \%>\%}
 
 }
 \author{
