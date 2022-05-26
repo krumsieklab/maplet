@@ -92,3 +92,4 @@ Suggests:
     metabolighteR
 VignetteBuilder: knitr
 biocViews: WorkflowStep, Metabolomics
+Remotes: krumsieklab/sgi

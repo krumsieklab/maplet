@@ -96,7 +96,7 @@ mt_plots_pathview <- function(D,
                               limit = list(gene = 1, cpd = 1),
                               ...) {
 
-  requireNamespace(pathview)
+  requireNamespace("pathview")
   data("bods", package = "pathview")
 
   # get argument names from dots
@@ -121,7 +121,7 @@ mt_plots_pathview <- function(D,
   if ("same.layer" %in% dot_args) stop("You used the old MT naming convention same.layer. Should be: same_layer.")
   if ("out.suffix" %in% dot_args) stop("You used the old MT naming convention out.suffix. Should be: out_suffix.")
   if ("add.pwname.suffix" %in% dot_args) stop("You used the old MT naming convention add.pwname.suffix. Should be: add_pwname_suffix.")
-  
+
   ## check input
   stopifnot("SummarizedExperiment" %in% class(D))
   ## if both gene_id and gene_data are given, throw an error
@@ -436,7 +436,7 @@ mt_plots_pathview <- function(D,
 
   # add status information & plot
   funargs <- mti_funargs()
-  D %<>% 
+  D %<>%
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("%d Pathway images saved in %s", n_pw, path_output),
