@@ -84,12 +84,13 @@ mt_stats_univ_missingness <- function(D, in_col, stat_name, samp_filter) {
 
   ## add status information & results
   funargs <- mti_funargs()
-  D %<>% 
+  D %<>%
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("missingness analysis with variable %s", as.character(in_col)),
       output = list(
         table   = res,
+        formula = sprintf("~ %s", in_col),
         name    = stat_name,
         samples.used = samples.used,
         outcome = in_col

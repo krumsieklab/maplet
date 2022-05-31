@@ -50,6 +50,7 @@ mt_post_fold_change <- function(D,
 
   ## GET OUTCOME (works for both lm and lmer)
   formula <- metadata(D)$results[[ stat_id ]]$output$formula
+  if(is.na(formula)) stop(glue::glue("Could not find formula in output of [stat_name]."))
   terms <- all.vars(as.formula(formula))
   outcome <- terms[1]
 
