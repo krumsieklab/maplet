@@ -104,6 +104,7 @@ mt_stats_univ_wilcox <- function(D, in_col, stat_name, samp_filter, paired=F, ex
       output = list(
         table = wt,
         #formula = as.formula(glue::glue("~ {in_col}")),
+        formula = sprintf("~ %s", in_col),
         name    = stat_name,
         groups = outgroups,
         #lstobj = NULL,

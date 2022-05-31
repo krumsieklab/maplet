@@ -87,12 +87,13 @@ mt_stats_univ_cor <- function(D, stat_name, in_col, method, samp_filter, exact=N
 
   # add status information
   funargs <- mti_funargs()
-  D %<>% 
+  D %<>%
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("%s correlation to %s", method, in_col),
       output = list(
         table = tab,
+        formula = sprintf("~ %s", in_col),
         name = stat_name,
         lstobj = NULL,
         groups = outgroups,
