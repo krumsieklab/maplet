@@ -112,9 +112,11 @@ mt_post_fold_change <- function(D,
 
   ## make sure fold change has the same sign as statistic
   ## this is a debug solution, it should come out properly from the code above... but this fixes the bug for now
-  metadata(D)$results[[stat_id]]$output$table$fc <-
-    metadata(D)$results[[stat_id]]$output$table$fc %>% abs() * sign(metadata(D)$results[[stat_id]]$output$table$statistic)
-
+  ## KC: this creates a problem with wilcox - quick fix for now
+  if(!('wilcox' %in% metadata(D)$results[[stat_id]]$fun)){
+    metadata(D)$results[[stat_id]]$output$table$fc <-
+      metadata(D)$results[[stat_id]]$output$table$fc %>% abs() * sign(metadata(D)$results[[stat_id]]$output$table$statistic)
+  }
 
   ## add status information & plot
   funargs <- mti_funargs()
