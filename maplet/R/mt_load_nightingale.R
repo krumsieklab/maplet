@@ -1,14 +1,27 @@
 #' Load Nightingale-format data
 #'
-#' Loads data from a Nightingale format Excel file.
+#' Loads data from a Nightingale format Excel file. Accepts three types of data format: 'single_sheet', 'multiple_sheets_v1',
+#' of 'multiple_sheets_v2'.\cr
+#' Format-type 'multiple_sheets_v1' is the default format and is the only type to use all sheet
+#' parameters (data_sheet, met_sheet, met_qc_sheet, and samp_qc_sheet); if missing default values will be used.\cr
+#' The single_sheet' format type requires only the sheet argument 'data_sheet' argument; this sheet is REQUIRED and the
+#' loader will crash if it is not provided.\cr
+#' The final format type 'mutliple_sheets_v2' is the latest version for working with Nightingale Excel files with multiple
+#' sheets. It requires the sheet arguments data_sheet and met_sheet. It will use default values if these arguments are not
+#' provided.
 #'
 #' @param D \code{SummarizedExperiment} input. Missing if first step in pipeline.
 #' @param file Name of input excel file.
-#' @param format_type Type of nightingale format: "single_sheet" or "multiple_sheets". Default: "multiple_sheets".
-#' @param data_sheet If format_type is multiple sheets, name of sheet with data.
-#' @param met_sheet If format type is multiple sheets, name of sheet with biomarker information. Default: "Biomarker annotations".
-#' @param met_qc_sheet If format type is multiple sheets, name of sheet with biomarker qc tags. Default: "Tags per biomarker".
-#' @param samp_qc_sheet If format type is multiple sheets, name of sheet with sample qc tags. Default: "Quality control tags and notes".
+#' @param format_type Type of nightingale format: "single_sheet", "multiple_sheets_v1", or "mutliple_sheets_v2. Default:
+#'    "multiple_sheets_v1".
+#' @param data_sheet If format_type is multiple sheets (v1 or v2), name of sheet with data. If format_type is
+#' 'single_sheet', this is the sheet that will be read. Default: 'Results' (default not used for 'single_sheet').
+#' @param met_sheet If format type is multiple sheets (v1 or v2), name of sheet with biomarker information.
+#'    Default: "Biomarker annotations".
+#' @param met_qc_sheet If format type is multiple sheets (v1 or v2), name of sheet with biomarker qc tags.
+#'    Default: "Tags per biomarker".
+#' @param samp_qc_sheet If format type is multiple sheets (v1 or v2), name of sheet with sample qc tags.
+#'    Default: "Quality control tags and notes".
 #' @param id_col OPTIONAL. Name of the column with sample IDs.
 #'
 #' @return Produces an initial \code{SummarizedExperiment}, with assay, colData, rowData, and metadata with first entry.
@@ -25,7 +38,7 @@
 mt_load_nightingale <- function(D,
                                 file,
                                 data_sheet,
-                                format_type = 'multiple_sheets',
+                                format_type = 'multiple_sheets_v1',
                                 met_sheet = 'Biomarker annotations',
                                 met_qc_sheet = 'Tags per biomarker',
                                 samp_qc_sheet = 'Quality control tags and notes',
@@ -44,29 +57,55 @@ mt_load_nightingale <- function(D,
     result$meta <- metadata(D)
   }
 
-  if(format_type=='multiple_sheets'){
+  if(format_type=='single_sheet'){
+    if(missing(data_sheet)){stop('data_sheet should be provided for single_sheet format!')}
+    if(missing(id_col)){id_col <- 'sampleid'}
+
+    # load single sheet
+    D <- load_single_sheet_format(file=file,
+                                  data_sheet=data_sheet, id_col=id_col)
+
+    # default sheet names if not provided
     if(missing(data_sheet)){data_sheet <- 'Results'}
+    if(missing(met_sheet)){met_sheet <- 'Biomarker annotations'}
+    if(missing(met_qc_sheet)){met_qc_sheet <- 'Tags per biomarker'}
+    if(missing(sample_qc_sheet)){sample_qc_sheet <- 'Quality control tags and notes'}
     if(missing(id_col)){id_col <- 'Sample id'}
+
+    # load multiple sheets
     D <- load_multiple_sheet_format(file=file,
                                     data_sheet=data_sheet, met_sheet=met_sheet,
                                     met_qc_sheet=met_qc_sheet, samp_qc_sheet=samp_qc_sheet, id_col=id_col)
-    # add original metadata if exists
-    if (!is.null(result$meta$results)) metadata(D)$results <- result$meta$results
-    if (!is.null(result$meta$settings)) metadata(D)$settings <- result$meta$settings
-  } else if (format_type=='single_sheet') {
+
+  } else if (format_type=='multiple_sheets_v1') {
     if(missing(data_sheet)){stop('data_sheet should be provided for single_sheet format!')}
     if(missing(id_col)){id_col <- 'sampleid'}
+
+    # load single sheet
     D <- load_single_sheet_format(file=file,
                                     data_sheet=data_sheet, id_col=id_col)
+
+  } else if (format_type=='multiple_sheets_v2'){
+    # default sheet names if not provided
+    if(missing(data_sheet)){data_sheet <- 'Results'}
+    if(missing(id_col)){id_col <- 'Sample id'}
+
+    # load multiple sheets, version 2
+    D <- load_v2_format(file=file,
+                        data_sheet=data_sheet, met_sheet=met_sheet, id_col=id_col)
     # add original metadata if exists
     if (!is.null(result$meta$results)) metadata(D)$results <- result$meta$results
     if (!is.null(result$meta$settings)) metadata(D)$settings <- result$meta$settings
 
   } else {stop(sprintf('Unknown format type, %s!', format_type))}
 
+  # add original metadata if exists
+  if (!is.null(result$meta$results)) metadata(D)$results <- result$meta$results
+  if (!is.null(result$meta$settings)) metadata(D)$settings <- result$meta$settings
+
   # add status information
   funargs <- mti_funargs()
-  D %<>% 
+  D %<>%
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("loaded Nightingale file: %s, sheet: %s", basename(file), data_sheet)
@@ -77,7 +116,7 @@ mt_load_nightingale <- function(D,
 
 }
 
-get_data <- function(mat, met_info, id_col, samp_qc_sheet=F){
+get_data <- function(mat, met_info, id_col, format_type, samp_qc_sheet=F){
   # find last metabolite column
   imetlast <- max(which(apply(is.na(mat),2,sum)<dim(mat)[1]))
   # find last sample row
@@ -85,7 +124,11 @@ get_data <- function(mat, met_info, id_col, samp_qc_sheet=F){
   # find row with table header
   tab_header <- min(which(!is.na(mat[, 1]))) + 1
   # find the first row of the data
-  data_start <- min(which(!is.na(mat[(tab_header+1):isamplast, 1]))) + (tab_header + 1)
+  if(format_type == 'v1'){
+    data_start <- min(which(!is.na(mat[(tab_header+1):isamplast, 1]))) + (tab_header + 1)
+  }else{
+    data_start <- min(which(!is.na(mat[(tab_header+1):isamplast, 2]))) + (tab_header + 4)
+  }
   # subset to data rows and columns
   if(samp_qc_sheet){
     col_ids <- c(which(mat[tab_header, ] %in%id_col): imetlast)
@@ -102,7 +145,7 @@ get_data <- function(mat, met_info, id_col, samp_qc_sheet=F){
 }
 
 load_multiple_sheet_format <- function(file,
-                                       data_sheet, met_sheet, met_qc_sheet, samp_qc_sheet, id_col){
+                                       data_sheet, met_sheet, met_qc_sheet, samp_qc_sheet, id_col, format_type="v1"){
   # using readxl package:
   raw <- readxl::read_excel(path=file, sheet=data_sheet, col_names = F)
   met_info <- readxl::read_excel(path=file, sheet=met_sheet, col_names = T)
@@ -113,11 +156,11 @@ load_multiple_sheet_format <- function(file,
 
   result <- list()
 
-  raw_data <- get_data(mat=raw, met_info, id_col)
-  qc_met <- get_data(mat=qc_met, met_info, id_col) %>% t() %>% data.frame()
+  raw_data <- get_data(mat=raw, met_info, id_col, format_type)
+  qc_met <- get_data(mat=qc_met, met_info, id_col, format_type) %>% t() %>% data.frame()
   names(qc_met) <- unlist(qc_met[1, ])
   qc_met <- qc_met[-1, ] %>% mutate('Excel_column_name' = rownames(qc_met[-1, ]))
-  qc_sample <- get_data(mat=qc_sample, met_info, id_col, samp_qc_sheet = T)
+  qc_sample <- get_data(mat=qc_sample, met_info, id_col, format_type, samp_qc_sheet = T)
   # add sample information
   result$sampleinfo <- data.frame(raw_data %>% select(id_col), stringsAsFactors = F, check.names = F) %>%
     left_join(qc_sample, by=id_col)
@@ -146,6 +189,7 @@ load_multiple_sheet_format <- function(file,
   # return SummarizedExperiment
   return(D)
 }
+
 load_single_sheet_format <- function (file=file,
                          data_sheet=data_sheet, id_col=id_col){
   # using readxl package:
@@ -192,3 +236,44 @@ load_single_sheet_format <- function (file=file,
   # return SummarizedExperiment
   return(D)
 }
+
+load_v2_format <- function(file, data_sheet, met_sheet, id_col, format_type="v2") {
+  # using readxl package:
+  # supress messages for renaming columns
+  suppressMessages(raw <- readxl::read_excel(path=file, sheet=data_sheet, col_names = F))
+  # met info
+  met_info <- readxl::read_excel(path=file, sheet=met_sheet, col_names = T)
+  # convert any spaces in the colnames to underscores
+  colnames(met_info) <- gsub(" ", "_", colnames(met_info))
+  raw_data <- get_data(mat=raw, met_info, id_col, format_type)
+
+
+  result <- list()
+  # add metabolite information
+  result$metinfo <- data.frame(met_info, check.names = F)
+  # add display name
+  result$metinfo$name   <- result$metinfo$Excel_column_name
+  result$sampleinfo <- data.frame(raw_data %>% dplyr::select(id_col), stringsAsFactors = F, check.names = F)
+  # add data
+  raw_data <- raw_data %>% dplyr::select(-id_col) %>% dplyr::mutate_all(as.matrix) %>% dplyr::mutate_all(as.numeric)
+  result$data <- data.frame(raw_data)
+
+  # fix variable names
+  colnames(result$data) <- result$metinfo$CSV_column_name
+  colnames(result$sampleinfo) %<>% gsub(" ", "_", .)
+
+  # generate summarized experiment
+  D <- SummarizedExperiment(assay    = t(result$data),
+                            colData  = result$sampleinfo,
+                            rowData  = result$metinfo,
+                            metadata = list(sessionInfo=utils::sessionInfo()))
+
+  # ensure colnames and rownames exist
+  if (is.null(colnames(D))) colnames(D) <- 1:ncol(D)
+  if (is.null(rownames(D))) rownames(D) <- result$metinfo$Excel_column_name
+  # return SummarizedExperiment
+  return(D)
+}
+
+
+

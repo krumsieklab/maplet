@@ -8,7 +8,7 @@ mt_load_nightingale(
   D,
   file,
   data_sheet,
-  format_type = "multiple_sheets",
+  format_type = "multiple_sheets_v1",
   met_sheet = "Biomarker annotations",
   met_qc_sheet = "Tags per biomarker",
   samp_qc_sheet = "Quality control tags and notes",
@@ -20,15 +20,20 @@ mt_load_nightingale(
 
 \item{file}{Name of input excel file.}
 
-\item{data_sheet}{If format_type is multiple sheets, name of sheet with data.}
+\item{data_sheet}{If format_type is multiple sheets (v1 or v2), name of sheet with data. If format_type is
+'single_sheet', this is the sheet that will be read. Default: 'Results' (default not used for 'single_sheet').}
 
-\item{format_type}{Type of nightingale format: "single_sheet" or "multiple_sheets". Default: "multiple_sheets".}
+\item{format_type}{Type of nightingale format: "single_sheet", "multiple_sheets_v1", or "mutliple_sheets_v2. Default:
+"multiple_sheets_v1".}
 
-\item{met_sheet}{If format type is multiple sheets, name of sheet with biomarker information. Default: "Biomarker annotations".}
+\item{met_sheet}{If format type is multiple sheets (v1 or v2), name of sheet with biomarker information.
+Default: "Biomarker annotations".}
 
-\item{met_qc_sheet}{If format type is multiple sheets, name of sheet with biomarker qc tags. Default: "Tags per biomarker".}
+\item{met_qc_sheet}{If format type is multiple sheets (v1 or v2), name of sheet with biomarker qc tags.
+Default: "Tags per biomarker".}
 
-\item{samp_qc_sheet}{If format type is multiple sheets, name of sheet with sample qc tags. Default: "Quality control tags and notes".}
+\item{samp_qc_sheet}{If format type is multiple sheets (v1 or v2), name of sheet with sample qc tags.
+Default: "Quality control tags and notes".}
 
 \item{id_col}{OPTIONAL. Name of the column with sample IDs.}
 }
@@ -36,7 +41,15 @@ mt_load_nightingale(
 Produces an initial \code{SummarizedExperiment}, with assay, colData, rowData, and metadata with first entry.
 }
 \description{
-Loads data from a Nightingale format Excel file.
+Loads data from a Nightingale format Excel file. Accepts three types of data format: 'single_sheet', 'multiple_sheets_v1',
+of 'multiple_sheets_v2'.\cr
+Format-type 'multiple_sheets_v1' is the default format and is the only type to use all sheet
+parameters (data_sheet, met_sheet, met_qc_sheet, and samp_qc_sheet); if missing default values will be used.\cr
+The single_sheet' format type requires only the sheet argument 'data_sheet' argument; this sheet is REQUIRED and the
+loader will crash if it is not provided.\cr
+The final format type 'mutliple_sheets_v2' is the latest version for working with Nightingale Excel files with multiple
+sheets. It requires the sheet arguments data_sheet and met_sheet. It will use default values if these arguments are not
+provided.
 }
 \examples{
 \dontrun{D <-
