@@ -21,8 +21,6 @@
 #'
 #' @return $result$output: list containing ggplot object
 #'
-#' @import sgi
-#'
 #' @examples
 #' \donttest{
 #'  D %>%
@@ -44,6 +42,8 @@ mt_plots_sgi <- function(D,
                          min_size,
                          padj_thresh = 0.05){
 
+  require(sgi)
+
   ### argument check ------
   if("SummarizedExperiment" %in% class(D)==F) stop("D must be a SummarizedExperiment object.")
   if(missing(outcomes)) stop("A value must be provided for argument \'outcomes\'.")
@@ -54,6 +54,12 @@ mt_plots_sgi <- function(D,
   # sgi expects samples in rows and features in columns
   data = t(assay(D))
   cd = as.data.frame(colData(D))
+
+  # check if data contrains NAs
+  if (any(is.na(data))) stop("Data matrix for sgi overview plot cannot contain NAs.")
+
+  # check if any metabolites have zero variance
+  if(any(data %>% apply(2, sd)==0)) stop("Some features have zero variance!")
 
   # if min cluster size not provided, use 5% sample size
   if(missing(min_size)) min_size = ceiling(nrow(data) * 0.05)

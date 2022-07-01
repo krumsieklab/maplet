@@ -266,7 +266,7 @@ D1 <- D1 %>%
 
 D1 <- D1 %>%
   # heading for html file
-  mt_reporting_heading(heading = "Statisitcal Results Presentation", lvl = 1) %>%
+  mt_reporting_heading(heading = "Statistical Results Presentation", lvl = 1) %>%
   # heading for html file
   mt_reporting_heading(heading = "Barplot", lvl = 2) %>%
   # create statsbarplots

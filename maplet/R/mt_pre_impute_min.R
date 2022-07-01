@@ -36,6 +36,11 @@ mt_pre_impute_min <- function(D, verbose=F) {
   df = apply(df, 1, function(x) {x[is.na(x)] <-  my_min(x); x} ) %>% t()
   assay(D, withDimnames = F) = df
 
+  # check for zero variance features
+  zv_features <- which(D %>% assay() %>% apply(1, sd) == 0) %>% names()
+  if(length(zv_features) != 0) mti_logwarning(paste0("The following features have non-zero variance:\n",
+                                                  paste0(zv_features, collapse = ", ")))
+
   # add status information
   funargs <- mti_funargs()
   D %<>%
