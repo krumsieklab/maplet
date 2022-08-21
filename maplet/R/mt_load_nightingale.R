@@ -56,35 +56,27 @@ mt_load_nightingale <- function(D,
     # get metadata
     result$meta <- metadata(D)
   }
-
-  if(format_type=='single_sheet'){
+  if (format_type=='single_sheet') {
     if(missing(data_sheet)){stop('data_sheet should be provided for single_sheet format!')}
     if(missing(id_col)){id_col <- 'sampleid'}
-
-    # load single sheet
+    
+    
     D <- load_single_sheet_format(file=file,
                                   data_sheet=data_sheet, id_col=id_col)
-
-    # default sheet names if not provided
+    # add original metadata if exists
+    if (!is.null(result$meta$results)) metadata(D)$results <- result$meta$results
+    if (!is.null(result$meta$settings)) metadata(D)$settings <- result$meta$settings
+    
+  } else if(format_type=='multiple_sheets_v1'){
+  
     if(missing(data_sheet)){data_sheet <- 'Results'}
-    if(missing(met_sheet)){met_sheet <- 'Biomarker annotations'}
-    if(missing(met_qc_sheet)){met_qc_sheet <- 'Tags per biomarker'}
-    if(missing(sample_qc_sheet)){sample_qc_sheet <- 'Quality control tags and notes'}
     if(missing(id_col)){id_col <- 'Sample id'}
-
-    # load multiple sheets
     D <- load_multiple_sheet_format(file=file,
                                     data_sheet=data_sheet, met_sheet=met_sheet,
                                     met_qc_sheet=met_qc_sheet, samp_qc_sheet=samp_qc_sheet, id_col=id_col)
-
-  } else if (format_type=='multiple_sheets_v1') {
-    if(missing(data_sheet)){stop('data_sheet should be provided for single_sheet format!')}
-    if(missing(id_col)){id_col <- 'sampleid'}
-
-    # load single sheet
-    D <- load_single_sheet_format(file=file,
-                                    data_sheet=data_sheet, id_col=id_col)
-
+    # add original metadata if exists
+    if (!is.null(result$meta$results)) metadata(D)$results <- result$meta$results
+    if (!is.null(result$meta$settings)) metadata(D)$settings <- result$meta$settings
   } else if (format_type=='multiple_sheets_v2'){
     # default sheet names if not provided
     if(missing(data_sheet)){data_sheet <- 'Results'}
