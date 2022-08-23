@@ -46,55 +46,76 @@ mt_plots_ml_evaluate <- function(D,
   # Validate arguments
   if("SummarizedExperiment" %in% class(D) == F) stop("D must be of class SummarizedExperiment!")
   if(missing(ml_name)) stop("A value must be provided for argument: ml_name.")
-  # TO-DO: assign a value to positive class to avoid ambiguity
-  #if(missing(pos_class)) stop("A value must be provided for argument: pos_class.")
 
   # retrieve output from machine learning function
   #   extract predictions / test indices per fold
   res_list <- maplet:::mti_get_ml_res_by_name(D, ml_name)
+  response_type <- res_list$output$response_type
   pred_list <- res_list$output$pred
   test_idx_list <- res_list$output$test_idx
+  object_list <- res_list$output$object
   if(length(pred_list) > 20) maplet:::mti_logwarning("More than 20 folds detected. Plot generation may take a long time.")
 
   # get num_folds and labels from colData
   num_folds <- res_list$output$num_folds
   labels <- res_list$output$response_col %>% colData(D)[,.]
 
-  # if all indices unique, generate AUC and evaluation measure plots for all folds
-  make_all_thresh_plots = FALSE
-  all_test_indices <- test_idx_list %>% unname() %>% unlist()
-  if(any(duplicated(all_test_indices))){
-    maplet:::mti_logwarning("Indices are not unique. Varying threshold plots will not be generated.")
+  if(response_type == "binary"){
+    # ensure response column is of type factor - will cause errors if not
+    pos_idx <- which(unique(labels)==res_list$output$pos_class)
+    labels <- factor(labels, c(unique(labels)[pos_idx], unique(labels)[-pos_idx]))
+
+    # if all indices unique, generate AUC and evaluation measure plots for all folds
+    make_all_thresh_plots = FALSE
+    all_test_indices <- test_idx_list %>% unname() %>% unlist()
+    if(any(duplicated(all_test_indices))){
+      maplet:::mti_logwarning("Indices are not unique. Varying threshold plots will not be generated.")
+    }else{
+      all_unique_samples = TRUE
+    }
+
+    # format data plotting, with columns: Class_Prob, Prediction, Label, Fold, Index
+    pred_df <- purrr::map_df(pred_list, ~as.data.frame(.x), .id="Fold")
+    test_idx_df <- purrr::map_df(test_idx_list, ~as.data.frame(.x), .id="Fold") %>% dplyr::select(-Fold)
+    folds_df <- dplyr::bind_cols(pred_df, test_idx_df) %>%
+      dplyr::rename(Class_Prob = 2, Index = 3) %>%
+      dplyr::mutate(Prediction = as.numeric(Class_Prob > cutoff)) %>%
+      dplyr::mutate(Label = as.numeric(labels[Index])-1) %>%
+      dplyr::select(Class_Prob, Prediction, Label, Fold, Index)
+
+    # Call plot generating functions
+    # confusion matrix tile plot(s)
+    confusion_matrix_plots <- make_confusion_matrix_plots(df = folds_df, num_folds = num_folds,
+                                                          per_fold_plots = per_fold_plots, labels=labels)
+    # dot plots include: AUC per fold, Evaluation Measure per fold, Folds per Evaluation Measure
+    dot_plots <- make_dot_plots(df = folds_df, num_folds=num_folds, all_unique_samples = all_unique_samples,
+                                plot_measures = plot_measures, cutoff = cutoff)
+    # append lists
+    plots <- c(confusion_matrix_plots, dot_plots)
+
+    # only produced when indices are unique
+    if(all_unique_samples){
+      # threshold plots include:
+      thresh_plots <- make_threshold_plots(df = folds_df, num_folds = num_folds, plot_measures = plot_measures,
+                                           cutoff = cutoff)
+      plots <- c(plots, thresh_plots)
+    }
+  }else if(response_type == "continuous"){
+    #df_list <- lapply(1:num_folds, function(x){cbind(test_idx=test_idx_list[[x]], fold=x, label=labels[test_idx_list[[x]]], pred_list[[x]])})
+    #fold_df <- do.call(rbind.data.frame, df_list)
+
+    # Call plot generating functions
+    # mean squared-error line plots
+    mse_plots <- create_mse_plots(num_folds = num_folds, pred_list = pred_list, labels=labels, test_idx_list=test_idx_list, object_list = object_list)
+    glmnet_mse_plots <- extract_glmnet_mse_plots(object_list = object_list)
+
+    plots <- c(mse_plots, glmnet_mse_plots)
+
+    # label-prediction correlation plots
   }else{
-    all_unique_samples = TRUE
+    stop("Value for 'response_type' must be one of: 'binary' or 'continuous'.")
   }
 
-  # format data plotting, with columns: Class_Prob, Prediction, Label, Fold, Index
-  pred_df <- purrr::map_df(pred_list, ~as.data.frame(.x), .id="Fold")
-  test_idx_df <- purrr::map_df(test_idx_list, ~as.data.frame(.x), .id="Fold") %>% dplyr::select(-Fold)
-  folds_df <- dplyr::bind_cols(pred_df, test_idx_df) %>%
-    dplyr::rename(Class_Prob = 2, Index = 3) %>%
-    dplyr::mutate(Prediction = as.numeric(Class_Prob > cutoff)) %>%
-    dplyr::mutate(Label = as.numeric(labels[Index])-1) %>%
-    dplyr::select(Class_Prob, Prediction, Label, Fold, Index)
-
-  # Call plot generating functions
-  # confusion matrix tile plot(s)
-  confusion_matrix_plots <- make_confusion_matrix_plots(df = folds_df, num_folds = num_folds,
-                                                        per_fold_plots = per_fold_plots, labels=labels)
-  # dot plots include: AUC per fold, Evaluation Measure per fold, Folds per Evaluation Measure
-  dot_plots <- make_dot_plots(df = folds_df, num_folds=num_folds, all_unique_samples = all_unique_samples,
-                              plot_measures = plot_measures, cutoff = cutoff)
-  # append lists
-  plots <- c(confusion_matrix_plots, dot_plots)
-
-  # only produced when indices are unique
-  if(all_unique_samples){
-    # threshold plots include:
-    thresh_plots <- make_threshold_plots(df = folds_df, num_folds = num_folds, plot_measures = plot_measures,
-                                         cutoff = cutoff)
-    plots <- c(plots, thresh_plots)
-  }
 
   # add status information & save plots
   logtxt <- glue::glue("Machine learning evaluation plots. Evalutaiton measures used ", glue::glue_collapse(plot_measures, ", "))
@@ -118,8 +139,6 @@ make_confusion_matrix_plots <- function(df, num_folds, per_fold_plots, labels){
 
   cm_table <- MLmetrics::ConfusionMatrix(y_pred = df$Prediction, y_true = df$Label) %>%
     as.data.frame %>% unlist() %>% unname()
-  #TClass <- as.factor(cm_table[1:4]-1)
-  #PClass <- as.factor(cm_table[5:8]-1)
   TClass <- as.factor(levels(labels)[cm_table[1:4]])
   PClass <- as.factor(levels(labels)[cm_table[5:8]])
   Y <- cm_table[9:12]
@@ -143,8 +162,6 @@ make_confusion_matrix_plots <- function(df, num_folds, per_fold_plots, labels){
       fold_df <- dplyr::filter(fdf, Fold == f)
       cm <- MLmetrics::ConfusionMatrix(fold_df$Prediction, fold_df$Label) %>%
         as.data.frame() %>%unlist() %>% unname()
-      #TClass <- as.factor(cm[1:4]-1)
-      #PClass <- as.factor(cm[5:8]-1)
       TClass <- as.factor(levels(labels)[cm_table[1:4]])
       PClass <- as.factor(levels(labels)[cm_table[5:8]])
       Y <- cm[9:12]
@@ -350,5 +367,66 @@ make_threshold_plots <- function(df, num_folds, plot_measures, cutoff){
   thresh_plots$facet_em_line <- p
 
   thresh_plots
+
+}
+
+create_mse_plots <- function(num_folds, pred_list, labels, test_idx_list, object_list){
+
+  # not giving me same results as glmnet plot - why?
+  mse_plots <- lapply(1:num_folds, function(x){
+
+    obj <- object_list[[x]]
+    til <- test_idx_list[[x]]
+    pl <- pred_list[[x]]
+
+    sqrd_err <- (labels[til] - pl)^2
+    cvm <- colMeans(sqrd_err)
+    cvsd <- apply(sqrd_err, 2, sd) / sqrt(nrow(sqrd_err))
+    cvup <- cvm+cvsd
+    cvlo <- cvm+cvsd
+
+    plot_df <- data.frame(log_lambda=log(obj$lambda), mean=cvm, se=cvsd)
+
+    g <- ggplot(plot_df, aes(x=log_lambda,y=mean)) +
+      geom_errorbar(aes(ymin=mean-se, ymax=mean+se)) +
+      geom_point(color="red") +
+      geom_vline(xintercept = log(obj$lambda.min), linetype="dashed") +
+      geom_vline(xintercept = log(obj$lambda.1se), linetype="dashed") +
+      xlab("Log(lambda)") +
+      ylab("Mean-Squared Error") +
+      ggtitle(glue::glue("Fold {x}")) +
+      theme_minimal()
+
+  })
+
+}
+
+extract_glmnet_mse_plots <- function(object_list){
+
+  glmnet_mse_plots <- list()
+
+  tmp <- lapply(1:length(object_list), function(x){
+
+    obj <- object_list[[x]]
+
+    png(glue::glue("fold{x}.png"))
+    dev.control('enable')
+    plot(obj)
+    title(glue::glue("Fold {x}", line=2))
+    p = recordPlot()
+    dev.off()
+    #file.remove("tmp.png")
+
+    glmnet_mse_plots[[x]] <- p
+
+  })
+
+  glmnet_mse_plots
+
+}
+
+create_cor_plots <- function(object){
+
+  print("This function is empty!")
 
 }
