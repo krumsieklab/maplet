@@ -25,7 +25,7 @@ Compares the following attributes of two SE objects:
 \item pathways_len - checks both objects have the same number of pathway annotation tables
 \item pathways_# - checks pathway annotation data frames are identical, # is a number identifying the pathway annotation data frame
 }
-Currently, plot objects and other non-stat table forms of output are ignored. Comparisons will only be made between two SE objects 
+Currently, plot objects and other non-stat table forms of output are ignored. Comparisons will only be made between two SE objects
 with identical function calls.
 }
 \examples{

@@ -62,7 +62,7 @@ mt_reporting_html <- function(D,
     file.rename(rdsfile, paste0(tools::file_path_sans_ext(file),'.rds'))
     rmdfile <- paste0(tools::file_path_sans_ext(file),'.rmd')
   }
-  
+
   # knit
   rmarkdown::render(rmdfile, params=list(D=D))
 
@@ -103,7 +103,7 @@ mt_reporting_html <- function(D,
 #' @importFrom magrittr %>% %<>%
 #' @import SummarizedExperiment
 #'
-#' @author JK
+#' @author JK, KC
 #'
 #' @noRd
 reporting_generateMD <- function(
@@ -183,7 +183,7 @@ params:
   } else  {
     writechunk('# load libraries\nlibrary(maplet)\nlibrary("plotly")')
   }
-  
+
   #### chunk that assigns list r from data
   if(keep_tmp){
     rds_file <- paste0(tools::file_path_sans_ext(outfile),".rds")
@@ -241,7 +241,7 @@ params:
             }
             extraparams <- sprintf(",fig.width=%f,fig.height=%f", width, height)
           } else if(length(r[[i]]$fun)>=3){
-            if(r[[i]]$fun[2]=="box"&r[[i]]$fun[3]=="scatter"){
+            if(r[[i]]$fun[2]=="box"&(r[[i]]$fun[3]=="scatter"|r[[i]]$fun[3]=="special")){
               # dynamic height
               if(!is.null(r[[i]]$output2)){
                 # set plot height
@@ -257,10 +257,14 @@ params:
           }
 
 
-
           # plot
           if (!use.plotly) {
-            writechunk( glue::glue("r[[{i}]]$output"), params = extraparams)
+            # use output2 for mt_plots_net
+            if(r[[i]]$fun[2]=="net"){
+              writechunk(glue::glue("r[[{i}]]$output2"), params = extraparams)
+            }else{
+              writechunk( glue::glue("r[[{i}]]$output"), params = extraparams)
+            }
           } else {
             writechunk( glue::glue("
 plotlist = r[[{i}]]$output %>% lapply(ggplotly)

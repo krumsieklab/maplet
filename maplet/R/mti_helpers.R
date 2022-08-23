@@ -24,7 +24,7 @@ mti_get_ml_res_by_name <- function(D, name){
     stop("no results element found in D")
   }
 
-  stats <- mti_res_get_path(D,"ml")
+  stats <- mtm_res_get_entries(D,"ml")
 
   if(length(stats) == 0){
     stop("no stats element found in D")
@@ -115,7 +115,7 @@ mti_generate_result <- function(
   output=NULL,
   output2=NULL
 ) {
-  
+
   # ensure structure of funargs
   stopifnot("fun" %in% names(funargs))
   stopifnot("args" %in% names(funargs))
@@ -133,7 +133,7 @@ mti_generate_result <- function(
   }else{
     assay_ptr <- NULL
   }
-  
+
   # assemble list
   metadata(D)$results %<>% mti_add_to_list(
     list(
@@ -147,28 +147,28 @@ mti_generate_result <- function(
     ),
     oname = paste(paste(funargs$fun,collapse = "_"), this.uuid, sep = ".")
   )
-  
+
   D
 }
 
 
 #' Return pointer to current assay
-#' 
-#' Checks whether assay has been updated. If true, adds new assay to $results$assay and assigns new head_assay and returns new 
+#'
+#' Checks whether assay has been updated. If true, adds new assay to $results$assay and assigns new head_assay and returns new
 #' pointer. Else, returns pointer to current head_assay.
-#' 
+#'
 #' @param assays List containing $head_ptr (pointer to current version of assay) and assay_lst (list of all versions of assay).
 #' @param res_assays Current assay data frame from latest function call.
-#' 
+#'
 #' @return assays List with updated $head_ptr and assay_lst (if assay changed).
-#' 
+#'
 #' @noRd
 mti_assay_ptr <- function(assays, res_assay){
-  
+
   if(is.null(assays)) assays <- list(head_ptr=NULL, assay_lst=list())
-  
+
   a_uuid = uuid::UUIDgenerate()
-  
+
   # no head, add current assay and update pointer
   if(is.null(assays$head_ptr) && !is.null(res_assay)){
     assay_ptr <- paste0("assay.", a_uuid)
@@ -178,7 +178,7 @@ mti_assay_ptr <- function(assays, res_assay){
     # get head_assay and compare to res_assay
     head_assay <- assays$assay_lst[[assays$head_ptr]]
     assay_changed <- !identical(head_assay, res_assay)
-    
+
     # if assay changed, add to list and update
     if(assay_changed){
       assay_ptr <- paste0("assay.", a_uuid)
@@ -186,9 +186,9 @@ mti_assay_ptr <- function(assays, res_assay){
       assays$head_ptr <- assay_ptr
     }
   }
-  
+
   assays
-  
+
 }
 
 
@@ -213,10 +213,18 @@ mti_funargs <- function(...) {
   # assemble results
   raw <-  as.list(match.call(sys.function(sys.parent(1)), call))
   if(typeof(raw[[1]])=="language") raw[[1]] <- as.character(raw[[1]])[[3]]
-  res <- list(
-    fun = strsplit(gsub(".*::", "", as.character(raw[[1]])), '_')[[1]],
-    args = raw[-1]
-  )
+  if(FALSE){
+  #if(any(sapply(raw[-1],typeof)=="symbol")){
+    res <- list(
+      fun = strsplit(gsub(".*::", "", as.character(raw[[1]])), '_')[[1]],
+      args = sapply(raw[-1], function(x){if(is.symbol(x)&& as.character(x)!="."){eval.parent(x)}else{x}})
+    )
+  }else{
+    res <- list(
+      fun = strsplit(gsub(".*::", "", as.character(raw[[1]])), '_')[[1]],
+      args = raw[-1]
+    )
+  }
   # remove "mt"
   res$fun = res$fun[res$fun!="mt"]
   # make sure D does not exist in args
@@ -520,5 +528,57 @@ mti_check_is_logged <- function(D){
   }
 
   is_logged
+
+}
+
+
+#' Get name of grandparent function
+#'
+#' Used by the logging (parent) functions to retrieve the name of the mt function (grandparent) that called it. Returns name of
+#' mt function to be used in the logging message.
+#'
+#' @param NONE Requires no parameters.
+#'
+#' @return name of the grandparent function
+#' @noRd
+mti_get_parent_name <- function(){
+
+  # get outer function call
+  call <- evalq(match.call(expand.dots = FALSE), parent.frame(2))
+
+  # get name of grandparent
+  fun <-  as.list(match.call(sys.function(sys.parent(2)), call))[[1]]
+
+  fun
+}
+
+
+#' Check Cache and Downloaded Files
+#'
+#' Check if file has been cached. If not, download the file and save to local directory.
+#'
+#' @param url URL to download from.
+#' @param local_file Path to local file (whether it already exists or not)
+#' @param download_fun Download function to use. Default: download.file.
+#' @param ... Additional parameters to be passed to download function.
+#'
+#' @return If cached, return loaded data. Else, return "downloaded".
+#' @noRd
+mti_cached_web_loader <- function(url, local_file, download_fun = download.file, ...) {
+
+  # 1. check if local file already exists
+  if (file.exists(local_file)) {
+    return("cached")
+  } else {
+
+    # 2. file not found locally, attempt to download
+    # if this throws an error, it'll get passed to the user
+    download.file(url, local_file)
+
+    # this is failsafe mechanism, in case some implementation of download.file does not throw an error
+    if (!file.exists(local_file)) {stop(sprintf("%s could not be downloaded", url))}
+
+    return("downloaded")
+  }
 
 }

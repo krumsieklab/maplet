@@ -5,7 +5,13 @@
 \alias{D_ex2}
 \title{A toy SE object with duplicated metabolites}
 \format{
-
+A \code{SummarizedExperiment} object with the following fields:
+\describe{
+  \item{assay}{Dataframe with 50 rows and 50 columns}
+  \item{colData}{Dataframe with 50 rows and 6 columns}
+  \item{rowData}{Dataframe with 50 rows and 15 columns}
+  \item{metadata}{empty list}
+}
 }
 \usage{
 D_ex2
