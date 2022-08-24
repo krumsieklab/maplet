@@ -59,16 +59,16 @@ mt_load_nightingale <- function(D,
   if (format_type=='single_sheet') {
     if(missing(data_sheet)){stop('data_sheet should be provided for single_sheet format!')}
     if(missing(id_col)){id_col <- 'sampleid'}
-    
-    
+
+
     D <- load_single_sheet_format(file=file,
                                   data_sheet=data_sheet, id_col=id_col)
     # add original metadata if exists
     if (!is.null(result$meta$results)) metadata(D)$results <- result$meta$results
     if (!is.null(result$meta$settings)) metadata(D)$settings <- result$meta$settings
-    
+
   } else if(format_type=='multiple_sheets_v1'){
-  
+
     if(missing(data_sheet)){data_sheet <- 'Results'}
     if(missing(id_col)){id_col <- 'Sample id'}
     D <- load_multiple_sheet_format(file=file,
@@ -108,6 +108,20 @@ mt_load_nightingale <- function(D,
 
 }
 
+handle_duplicates <- function(mat, id_col){
+
+  samp_col <- mat[[id_col]]
+  dup_names <- samp_col[which(duplicated(samp_col))]
+  if(length(dup_names) > 0){
+    dup_idxs <- lapply(dup_names, function(x){dup_idx <- which(samp_col==x)})
+    new_names <- lapply(dup_idxs, function(x){sapply(seq(x), function(y){glue::glue("{samp_col[x[y]]}-{y}")})}) %>% unlist()
+    samp_col[unlist(dup_idxs)] <- new_names
+    mat[[id_col]] <- samp_col
+  }
+  mat
+
+}
+
 get_data <- function(mat, met_info, id_col, format_type, samp_qc_sheet=F){
   # find last metabolite column
   imetlast <- max(which(apply(is.na(mat),2,sum)<dim(mat)[1]))
@@ -133,6 +147,9 @@ get_data <- function(mat, met_info, id_col, format_type, samp_qc_sheet=F){
     mat <- mat[data_start:isamplast, which(mat[tab_header, ] %in%col_names)]
     names(mat) <- col_names
   }
+  # identify any duplicates and add suffix to make unique
+  mat <- handle_duplicates(mat, id_col)
+
   return(mat)
 }
 
@@ -216,6 +233,10 @@ load_single_sheet_format <- function (file=file,
   # fix variable names
   colnames(result$data) <- result$metinfo$name
   colnames(result$sampleinfo) %<>% gsub(" ", "_", .)
+
+  # identify any duplicates in sample data frame and add suffix to make unique
+  result$sampleinfo <- handle_duplicates(result$sampleinfo, id_col)
+
   # generate summarized experiment
   D <- SummarizedExperiment(assay    = t(result$data),
                             colData  = result$sampleinfo,
