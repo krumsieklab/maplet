@@ -145,7 +145,7 @@ get_data <- function(mat, met_info, id_col, format_type, samp_qc_sheet=F){
     # find the names of the table
     col_names <- c(id_col, met_info[['Excel_column_name']])
     mat <- mat[data_start:isamplast, which(mat[tab_header, ] %in%col_names)]
-    names(mat) <- col_names
+    names(mat) <- make.names(col_names, unique = T)
   }
   # identify any duplicates and add suffix to make unique
   mat <- handle_duplicates(mat, id_col)
@@ -168,7 +168,7 @@ load_multiple_sheet_format <- function(file,
   raw_data <- get_data(mat=raw, met_info, id_col, format_type)
   qc_met <- get_data(mat=qc_met, met_info, id_col, format_type) %>% t() %>% data.frame()
   names(qc_met) <- unlist(qc_met[1, ])
-  qc_met <- qc_met[-1, ] %>% mutate('Excel_column_name' = rownames(qc_met[-1, ]))
+  qc_met <- qc_met[-1, ] %>% mutate('Excel_column_name' = rownames(qc_met)[-1])
   qc_sample <- get_data(mat=qc_sample, met_info, id_col, format_type, samp_qc_sheet = T)
   # add sample information
   result$sampleinfo <- data.frame(raw_data %>% select(id_col), stringsAsFactors = F, check.names = F) %>%
