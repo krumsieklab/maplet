@@ -37,11 +37,11 @@
 #' @export
 mt_plots_ml_evaluate <- function(D,
                                  ml_name,
-                                 plot_measures = c("spec", "sens", "ppv"),
+                                 plot_measures,
                                  cutoff = 0.5,
                                  per_fold_plots = TRUE){
 
-  PLOT_MEASURE_ABBR = c("spec", "sens", "ppv", "acc", "f1")
+  PLOT_MEASURE_ABBR = c("spec", "sens", "ppv", "acc", "f1", "mse", "cor")
 
   # Validate arguments
   if("SummarizedExperiment" %in% class(D) == F) stop("D must be of class SummarizedExperiment!")
@@ -53,7 +53,6 @@ mt_plots_ml_evaluate <- function(D,
   response_type <- res_list$output$response_type
   pred_list <- res_list$output$pred
   test_idx_list <- res_list$output$test_idx
-  object_list <- res_list$output$object
   if(length(pred_list) > 20) maplet:::mti_logwarning("More than 20 folds detected. Plot generation may take a long time.")
 
   # get num_folds and labels from colData
@@ -61,6 +60,9 @@ mt_plots_ml_evaluate <- function(D,
   labels <- res_list$output$response_col %>% colData(D)[,.]
 
   if(response_type == "binary"){
+    # default plot measures for binary case
+    if(missing(plot_measures)) plot_measures <- c("spec", "sens", "ppv")
+
     # ensure response column is of type factor - will cause errors if not
     pos_idx <- which(unique(labels)==res_list$output$pos_class)
     labels <- factor(labels, c(unique(labels)[pos_idx], unique(labels)[-pos_idx]))
@@ -101,15 +103,23 @@ mt_plots_ml_evaluate <- function(D,
       plots <- c(plots, thresh_plots)
     }
   }else if(response_type == "continuous"){
-    #df_list <- lapply(1:num_folds, function(x){cbind(test_idx=test_idx_list[[x]], fold=x, label=labels[test_idx_list[[x]]], pred_list[[x]])})
-    #fold_df <- do.call(rbind.data.frame, df_list)
+    # default plot measures for continuous case
+    if(missing(plot_measures)) plot_measures <- c("mse", "cor")
+
+    # check test indices unique
+    all_test_indices <- test_idx_list %>% unname() %>% unlist()
+    if(any(duplicated(all_test_indices))){
+      maplet:::mti_logwarning("Indices are not unique. All folds plots will not be generated.")
+    }else{
+      all_unique_samples = TRUE
+    }
 
     # Call plot generating functions
     # mean squared-error line plots
-    mse_plots <- create_mse_plots(num_folds = num_folds, pred_list = pred_list, labels=labels, test_idx_list=test_idx_list, object_list = object_list)
-    glmnet_mse_plots <- extract_glmnet_mse_plots(object_list = object_list)
+    mse_cor_plots <- create_mse_cor_plots(num_folds = num_folds, pred_list = pred_list, labels=labels, test_idx_list=test_idx_list, all_unique_samples = all_unique_samples)
+    cor_plots <- create_cor_plots(num_folds = num_folds, pred_list = pred_list, labels=labels, test_idx_list=test_idx_list, all_unique_samples=all_unique_samples)
 
-    plots <- c(mse_plots, glmnet_mse_plots)
+    plots <- c(mse_cor_plots, cor_plots)
 
     # label-prediction correlation plots
   }else{
@@ -370,63 +380,108 @@ make_threshold_plots <- function(df, num_folds, plot_measures, cutoff){
 
 }
 
-create_mse_plots <- function(num_folds, pred_list, labels, test_idx_list, object_list){
+create_mse_cor_plots <- function(num_folds, pred_list, labels, test_idx_list, all_unique_samples){
 
   # not giving me same results as glmnet plot - why?
-  mse_plots <- lapply(1:num_folds, function(x){
+  mse_cor_vals <- lapply(1:num_folds, function(x){
 
-    obj <- object_list[[x]]
     til <- test_idx_list[[x]]
-    pl <- pred_list[[x]]
+    y <- labels[til]
+    yh <- pred_list[[x]]
 
-    sqrd_err <- (labels[til] - pl)^2
-    cvm <- colMeans(sqrd_err)
-    cvsd <- apply(sqrd_err, 2, sd) / sqrt(nrow(sqrd_err))
-    cvup <- cvm+cvsd
-    cvlo <- cvm+cvsd
+    mse <- mean((y-yh)^2, na.rm=TRUE)
 
-    plot_df <- data.frame(log_lambda=log(obj$lambda), mean=cvm, se=cvsd)
+    y_cor <- cor(y, yh)
 
-    g <- ggplot(plot_df, aes(x=log_lambda,y=mean)) +
-      geom_errorbar(aes(ymin=mean-se, ymax=mean+se)) +
-      geom_point(color="red") +
-      geom_vline(xintercept = log(obj$lambda.min), linetype="dashed") +
-      geom_vline(xintercept = log(obj$lambda.1se), linetype="dashed") +
-      xlab("Log(lambda)") +
-      ylab("Mean-Squared Error") +
-      ggtitle(glue::glue("Fold {x}")) +
-      theme_minimal()
+    data.frame(mse=mse, cor=y_cor, fold=glue::glue("Fold {x}"))
 
-  })
+  }) %>% do.call(rbind,.)
+
+  if(all_unique_samples){
+
+    avg_mse <- mean(mse_cor_vals[["mse"]])
+    avg_cor <- mean(mse_cor_vals[["cor"]])
+
+    all_pred <- unlist(pred_list)
+    ord_labels <- sapply(1:num_folds, function(x){labels[test_idx_list[[x]]]}) %>% unlist()
+
+    af_mse <- mean((ord_labels - all_pred)^2,na.rm=TRUE)
+    af_cor <- cor(ord_labels, all_pred)
+
+    mse_cor_vals <- rbind(mse_cor_vals,
+                          data.frame(mse=c(avg_mse, af_mse), cor=c(avg_cor, af_cor), fold=c("Average","All")))
+  }
+
+  plot_df <- reshape2::melt(mse_cor_vals, id="fold")
+
+  p <- ggplot(plot_df, aes(x=factor(variable), y=value)) +
+    geom_boxplot(outlier.shape = NA) +
+    geom_point(aes(shape=fold, color=fold), size=5, stroke=2, position = position_dodge2(w = 0.2)) +
+    {if(all_unique_samples){
+      scale_shape_manual(name = "fold",
+                         labels = c("All", "Average", paste0("Fold ", 1:num_folds)),
+                         values=c(17, 4, rep(16, num_folds)))
+    }else{
+      scale_shape_manual(name = "fold",
+                         labels = c("Average", paste0("Fold ", 1:num_folds)),
+                         values=c(4, rep(16, num_folds)))}} +
+    ylab("Value per Fold") +
+    ggtitle("Evaluation Measures (Per Fold)") +
+    facet_wrap(~variable, scales = "free") +
+    theme(text = element_text(size=15),
+          axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank())
+
+  list(p)
 
 }
 
-extract_glmnet_mse_plots <- function(object_list){
 
-  glmnet_mse_plots <- list()
+create_cor_plots <- function(num_folds, pred_list, labels, test_idx_list, all_unique_samples){
 
-  tmp <- lapply(1:length(object_list), function(x){
+  plot_df <- lapply(1:num_folds, function(x){
 
-    obj <- object_list[[x]]
+    til <- test_idx_list[[x]]
+    y <- labels[til]
+    yh <- pred_list[[x]]
+    n <- length(y)
 
-    png(glue::glue("fold{x}.png"))
-    dev.control('enable')
-    plot(obj)
-    title(glue::glue("Fold {x}", line=2))
-    p = recordPlot()
-    dev.off()
-    #file.remove("tmp.png")
+    y_cor <- cor(y, yh)
 
-    glmnet_mse_plots[[x]] <- p
+    data.frame(pred = yh, lab=y, cor=rep(y_cor,n), fold=rep(glue::glue("Fold {x}"),n))
 
-  })
+  }) %>% do.call(rbind,.)
 
-  glmnet_mse_plots
+  plot_list <- list()
 
-}
+  if(all_unique_samples){
+    all_data_annotate <- data.frame(fold = "All folds", annotate=glue::glue("cor: {round(cor(plot_df$lab, plot_df$pred),2)}"))
+    p <- ggplot(plot_df, aes(x = lab, y = pred)) +
+      geom_point() +
+      geom_smooth(method=lm, se=FALSE) +
+      ggtitle(glue::glue("All Folds, cor: {round(cor(plot_df$lab, plot_df$pred),2)}")) +
+      xlab("Label") +
+      ylab("Prediction") +
+      theme(text = element_text(size=15))
+    plot_list <- c(plot_list, list(p))
+  }
 
-create_cor_plots <- function(object){
+  data_annotate <- data.frame(fold = unique(plot_df$fold), annotate = glue::glue("cor: {round(unique(plot_df$cor),2)}"))
 
-  print("This function is empty!")
+  p <- ggplot(plot_df, aes(x = lab, y = pred)) +
+    geom_point() +
+    geom_smooth(method=lm, se=FALSE) +
+    geom_text(data = data_annotate,
+              aes(label = annotate),
+              x = -Inf, y = Inf, hjust = -0.05, vjust = 1.05, size=3.88 ) +
+    facet_wrap(~fold, scales = "free", ncol = 2) +
+    xlab("Label") +
+    ylab("Prediction") +
+    theme(text = element_text(size=15)) +
+    ggtitle("Correlation (Per Fold)")
+  plot_list <- c(plot_list, list(p))
+
+  plot_list
 
 }

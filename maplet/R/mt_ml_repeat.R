@@ -122,17 +122,11 @@ run_train_test <- function(idx, ml_fun_name, x, y, response_type, mod_args, pred
                       response_type=response_type, mod_args = mod_args, pred_args = pred_args)
   pred_args <- do.call(ml_fun, ml_fun_args)
 
-  # if continuous, return predictions for all lambda values
-  if(response_type=="continuous") pred_args$s <- pred_args$object$lambda
-
   # get predicted values
   if(is.null(pred_args$type)) pred_args$type <- "response" # get class probabilities by default
   pred <- do.call(predict, pred_args)
 
-  # if continuous, determine min and 1se columns
-  #if(response_type=="continuous") pred %<>% as.data.frame() %>% rename_at(vars(colnames(pred)[pred_args$object$index]), function(x) rownames(pred_args$object$index))
-
-  fold_res <- list(test_idx = idx, pred = pred, object = pred_args$object)
+  fold_res <- list(test_idx = idx, pred = as.numeric(pred))
 
   fold_res
 
