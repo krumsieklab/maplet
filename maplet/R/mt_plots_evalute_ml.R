@@ -128,7 +128,7 @@ mt_plots_ml_evaluate <- function(D,
 
 
   # add status information & save plots
-  logtxt <- glue::glue("Machine learning evaluation plots. Evalutaiton measures used ", glue::glue_collapse(plot_measures, ", "))
+  logtxt <- glue::glue("Machine learning evaluation plots. Evaluation measures used ", glue::glue_collapse(plot_measures, ", "))
   funargs <- maplet:::mti_funargs()
   D %<>%
     maplet:::mti_generate_result(
@@ -282,7 +282,7 @@ make_dot_plots <- function(df, num_folds,  all_unique_samples, plot_measures, cu
     reshape2::melt(id=c("Fold")) %>%
     dplyr::filter(grepl("Fold", Fold)) %>%
     ggplot(., aes(x= factor(Fold), y=value, color=variable)) +
-    geom_point(size=5) +
+    geom_point(size=5, position = position_dodge2(w = 0.2)) +
     xlab("Fold") +
     ylab("Value") +
     ggtitle(paste0("Evaluation Measures (Per Fold), cutoff: ", round(cutoff,2))) +
@@ -327,7 +327,7 @@ make_threshold_plots <- function(df, num_folds, plot_measures, cutoff){
     ylab("Evaluation Measure Values") +
     labs(color='Measures') +
     geom_vline(xintercept = cutoff) +
-    ggtitle(paste0("Evaluaiton Measures (All Folds), cutoff: ", round(cutoff,2))) +
+    ggtitle(paste0("Evaluation Measures (All Folds), cutoff: ", round(cutoff,2))) +
     theme(text = element_text(size=15))
   thresh_plots$em_thresh_all <- measures_plot
 
@@ -448,8 +448,9 @@ create_cor_plots <- function(num_folds, pred_list, labels, test_idx_list, all_un
     n <- length(y)
 
     y_cor <- cor(y, yh)
+    y_mse <- mean((y-yh)^2,na.rm=TRUE)
 
-    data.frame(pred = yh, lab=y, cor=rep(y_cor,n), fold=rep(glue::glue("Fold {x}"),n))
+    data.frame(pred = yh, lab=y, mse=rep(y_mse,n), cor=rep(y_cor,n), fold=rep(glue::glue("Fold {x}"),n))
 
   }) %>% do.call(rbind,.)
 
@@ -457,29 +458,30 @@ create_cor_plots <- function(num_folds, pred_list, labels, test_idx_list, all_un
 
   if(all_unique_samples){
     all_data_annotate <- data.frame(fold = "All folds", annotate=glue::glue("cor: {round(cor(plot_df$lab, plot_df$pred),2)}"))
-    p <- ggplot(plot_df, aes(x = lab, y = pred)) +
+    p <- ggplot(plot_df, aes(x = pred, y = lab)) +
       geom_point() +
       geom_smooth(method=lm, se=FALSE) +
-      ggtitle(glue::glue("All Folds, cor: {round(cor(plot_df$lab, plot_df$pred),2)}")) +
-      xlab("Label") +
-      ylab("Prediction") +
+      ggtitle(glue::glue("All Folds, mse: {round(mean((plot_df$lab-plot_df$pred)^2),2)}, cor: {round(cor(plot_df$lab, plot_df$pred),2)}")) +
+      xlab("Prediction") +
+      ylab("Real Value") +
       theme(text = element_text(size=15))
     plot_list <- c(plot_list, list(p))
   }
 
-  data_annotate <- data.frame(fold = unique(plot_df$fold), annotate = glue::glue("cor: {round(unique(plot_df$cor),2)}"))
+  data_annotate <- data.frame(fold = unique(plot_df$fold),
+                              annotate = glue::glue("mse: {round(unique(plot_df$mse),2)}\ncor: {round(unique(plot_df$cor),2)}"))
 
-  p <- ggplot(plot_df, aes(x = lab, y = pred)) +
+  p <- ggplot(plot_df, aes(x = pred, y = lab)) +
     geom_point() +
     geom_smooth(method=lm, se=FALSE) +
     geom_text(data = data_annotate,
               aes(label = annotate),
               x = -Inf, y = Inf, hjust = -0.05, vjust = 1.05, size=3.88 ) +
     facet_wrap(~fold, scales = "free", ncol = 2) +
-    xlab("Label") +
-    ylab("Prediction") +
+    xlab("Prediction") +
+    ylab("Real Value") +
     theme(text = element_text(size=15)) +
-    ggtitle("Correlation (Per Fold)")
+    ggtitle("MSE and Correlation (Per Fold)")
   plot_list <- c(plot_list, list(p))
 
   plot_list
