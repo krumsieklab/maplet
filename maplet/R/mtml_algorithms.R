@@ -34,7 +34,7 @@ mtml_glmnet <- function(train_data, train_label, test_data, response_type, mod_a
 
   # add model and test data to predict args
   pred_args$object <- mod
-  pred_args$newx <- test_data
+  pred_args$newx <- as.matrix(test_data)
 
   # return predict args
   pred_args
@@ -89,7 +89,7 @@ mtml_gradboost <- function(train_data, train_label, test_data, response_type, mo
 
   # add model and formatted test data to predict args
   pred_args$object <- mod
-  pred_args$newdata <- xgboost::xgb.DMatrix(data = test_data)
+  pred_args$newdata <- xgboost::xgb.DMatrix(data = data.matrix(test_data))
 
   # return return predict args
   pred_args

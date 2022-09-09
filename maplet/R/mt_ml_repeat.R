@@ -9,6 +9,7 @@
 #' @param response_col Name of the colData column containing the data labels.
 #' @param response_type Indicates the type of learning task. One of "binary" or
 #'    "continuous". Default: "binary".
+#' @param covar_cols An optional vector of covariate columns taken from colData.
 #' @param sampling_method Type of cross-validation / sampling method using. Must be one of: cv (add more later).
 #'    Default: cv.
 #' @param num_folds For k-fold cross-validation, this represents the number of folds (k).
@@ -32,6 +33,7 @@ mt_ml_repeat <- function(D,
                          ml_name,
                          response_col,
                          response_type="binary",
+                         covar_cols,
                          sampling_method = "cv",
                          num_folds,
                          rand_seed,
@@ -56,6 +58,18 @@ mt_ml_repeat <- function(D,
   x <- t(assay(D))   # data frame to be split into training / testing
   y <- colData(D)[,response_col]   # corresponding class labels
   if (missing(rand_seed)) rand_seed <- NULL
+
+  # if covariates provided, append to end of data matrix
+  if(!missing(covar_cols)){
+    val_cc <- covar_cols[covar_cols %in% colnames(colData(D))]
+    if(length(val_cc) == 0){
+      warning("None of the provided covariates were found in colData. Preceding without covariates.")
+    }else if(length(val_cc) != length(covar_cols)){
+      warning(glue::glue("{length(covar_cols) - length(val_cc)} out of {length(covar_cols)} covariates not found in colData. Preceding with remaining covariates."))
+    }
+    x <- cbind(x, as.data.frame(colData(D))[,val_cc])
+
+  }
 
   # for binary case, ensure y is of type factor and pos_class is the first level
   if(response_type=="binary"){
@@ -84,12 +98,20 @@ mt_ml_repeat <- function(D,
   # flip fold list inside-out to separate predictions and indices
   pred_test_idx_list <- purrr::transpose(fold_res_list)
 
+  # create logtxt
+  if(missing(covar_cols)){
+    logtxt = paste(glue::glue("Performed {ml_fun_name}, repeated using {sampling_method} method."))
+  }else{
+    val_cc_str <- paste0(val_cc, collapse = ", ")
+    logtxt = paste(glue::glue("Performed {ml_fun_name}, with covariates {val_cc_str}, repeated using {sampling_method} method."))
+  }
+
   # add status information
   funargs <- maplet:::mti_funargs()
   D %<>%
     maplet:::mti_generate_result(
       funargs = funargs,
-      logtxt = paste(glue::glue("Performed {ml_fun_name}, repeated using {sampling_method} method.")),
+      logtxt = logtxt,
       output = list(name = ml_name,
                     response_col = response_col,
                     response_type = response_type,
