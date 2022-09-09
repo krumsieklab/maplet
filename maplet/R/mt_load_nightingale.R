@@ -129,19 +129,33 @@ get_data <- function(mat, met_info, id_col, format_type, samp_qc_sheet=F){
   isamplast <- max(which(apply(is.na(mat),1,sum)<dim(mat)[2]))
   # find row with table header
   tab_header <- min(which(!is.na(mat[, 1]))) + 1
-  # find the first row of the data
-  if(format_type == 'v1'){
-    data_start <- min(which(!is.na(mat[(tab_header+1):isamplast, 1]))) + (tab_header + 1)
-  }else{
-    data_start <- min(which(!is.na(mat[(tab_header+1):isamplast, 2]))) + (tab_header + 4)
-  }
+  # check id_col is in header, quit if not
+  samp_col_idx <- which(id_col == mat[tab_header,])
+  if(!length(samp_col_idx)) stop(glue::glue("Column {id_col} not found in table header. Check file."))
+
   # subset to data rows and columns
   if(samp_qc_sheet){
+    # if 'occurences' row present, sample ids begin below it
+    data_start <- which("occurrences" == tolower(pull(mat, samp_col_idx))) + 1
+    # else, sample ids begin after first non-missing row below table header
+    if(!length(data_start)) data_start <- tab_header + min(which(!is.na(mat[(tab_header+1):isamplast, 1])))
+
     col_ids <- c(which(mat[tab_header, ] %in%id_col): imetlast)
     col_names <- unlist(c(id_col, mat[(tab_header-1), col_ids[-1]]))
     mat <- mat[data_start:isamplast, col_ids]
     names(mat) <- col_names
   } else{
+    # find the first row of the data
+    if(format_type == 'v1'){
+      # if 'subgroup' row present, sample ids begin below it
+      data_start <- which("subgroup" == tolower(pull(mat, samp_col_idx))) + 1
+      # else, sample ids beging after first non-missing row below table header
+      if(!length(data_start)) data_start <- tab_header + min(which(!is.na(mat[(tab_header+1):isamplast, 1])))
+    }else{
+      data_start <- which("subgroup" == tolower(pull(mat, samp_col_idx))) + 1
+      if(!length(data_start)) stop("Beginning of data frame could not be found.")
+    }
+
     # find the names of the table
     col_names <- c(id_col, met_info[['Excel_column_name']])
     mat <- mat[data_start:isamplast, which(mat[tab_header, ] %in%col_names)]
@@ -208,9 +222,16 @@ load_single_sheet_format <- function (file=file,
   # find last sample row
   isamplast <- max(which(apply(is.na(raw),1,sum)<dim(raw)[2]))
   # find row with table header
-  tab_header <- min(which(!is.na(raw[, 1]))) +1
-  # find the first row of the data
-  data_start <- 1 + (min(which(!is.na(raw[(tab_header+1):isamplast, 1]))) + (tab_header + 1))
+  tab_header <- min(which(!is.na(raw[, 1])))+1
+  # exit if id_col not found
+  samp_col_idx <- which(id_col == raw[tab_header,])
+  if(!length(samp_col_idx)) stop(glue::glue("Column {id_col} not found in table header. Check file."))
+  # find the first row of the data, if 'success %' present, sample ids begin after this row
+  data_start <- which("success %" == tolower(pull(raw, samp_col_idx))) + 1
+  # else, find the first non-missing value row after table header, sample ids begin two rows after this
+  if(!length(data_start)) data_start <- tab_header + min(which(!is.na(raw[(tab_header):isamplast, 1]))) + 1
+
+
   # subset to data rows and columns
   col_ids <- c(which(raw[tab_header, ] %in%id_col): imetlast)
   col_names <- unlist(c(id_col, raw[tab_header, col_ids[-1]]))
