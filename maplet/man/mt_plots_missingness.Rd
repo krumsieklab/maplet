@@ -39,7 +39,11 @@ mt_plots_missingness(
 $result$output: plot, two plots
 }
 \description{
-
+Creates two kinds of plots:
+\enumerate{
+  \item{missing value matrix view (samples and features)}
+  \item{sorted missing value percentage plot (samples and/or features)}
+}
 }
 \examples{
 \dontrun{\%>\%  mt_plots_missingness() \%>\% # without horizontal line

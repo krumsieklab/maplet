@@ -19,7 +19,7 @@ Data frame with columns: step, fun, test, and result.
 \description{
 Compares reference objects for each step in a pipeline to the individual results of each step in a pipeline
 being run in real-time.
-Currently, plot objects and other non-stat table forms of output are ignored. Comparisons will only be made between two SE objects 
+Currently, plot objects and other non-stat table forms of output are ignored. Comparisons will only be made between two SE objects
 with identical function calls.
 }
 \examples{

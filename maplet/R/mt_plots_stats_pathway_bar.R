@@ -268,7 +268,7 @@ mt_plots_stats_pathway_bar <- function(D,
     p <- ggplot(data_plot, aes(label)) +
       (if("association" %in% colnames(data_plot)) {geom_bar(data = subset(data_plot, association == "positive"), aes(y = !!sym(y_scale), fill = color), stat = "identity", position = "dodge", color="black", size=0.4)}) +
       (if("association" %in% colnames(data_plot)) {geom_bar(data = subset(data_plot, association == "negative"), aes(y = -!!sym(y_scale), fill = color), stat = "identity", position = "dodge", color="black", size=0.4)} else{geom_bar(aes(x=label, y=!!sym(y_scale), fill=color), stat = "identity", color="black", size=0.4)}) +
-      (if(y_scale=="fraction") {ggtitle(sprintf("Fraction of pathway affected, %s", gsub("~", "", rlang::expr_text(dplyr::enquo(feat_filter)))))}else{ggtitle(sprintf("Number of hits per pathway, %s", gsub("~", "", rlang::expr_text(enquo(feat_filter)))))}) +
+      (if(y_scale=="fraction") {ggtitle(sprintf("Fraction of pathway affected, %s", gsub("~", "", rlang::expr_text(dplyr::enquo(feat_filter)))))}else{ggtitle(sprintf("Number of hits per pathway, %s", gsub("~", "", rlang::expr_text(dplyr::enquo(feat_filter)))))}) +
       (if(y_scale=="count" & "association" %in% colnames(data_plot)) {expand_limits(y=c(-max(data_plot$count, na.rm = T)*1.7, max(data_plot$count, na.rm = T)*1.7))}) +
       (if(y_scale=="count" & !("association" %in% colnames(data_plot))) {expand_limits(y=c(0, max(data_plot$count, na.rm = T)*1.7))}) +
       (if(y_scale=="fraction" & "association" %in% colnames(data_plot)) {expand_limits(y=c(-1, 1))}) +
@@ -335,7 +335,7 @@ mt_plots_stats_pathway_bar <- function(D,
       wb = openxlsx::createWorkbook()
       sheet = openxlsx::addWorksheet(wb, "Parameters")
       if(is.null(color_col)){color_col <- 'none'}
-      openxlsx::writeData(wb, sheet=sheet, list(comparisons = stat_list, feat_filter = gsub("~", "", rlang::expr_text(enquo(feat_filter))), group_col = group_col, coloredby = color_col))
+      openxlsx::writeData(wb, sheet=sheet, list(comparisons = stat_list, feat_filter = gsub("~", "", rlang::expr_text(dplyr::enquo(feat_filter))), group_col = group_col, coloredby = color_col))
       sheet = openxlsx::addWorksheet(wb, "AggregatedPathways")
       openxlsx::writeData(wb, sheet=sheet, data_plot, rowNames = F, colNames = T)
       sheet = openxlsx::addWorksheet(wb, "IndividualResults")
@@ -351,7 +351,7 @@ mt_plots_stats_pathway_bar <- function(D,
   D %<>%
     mti_generate_result(
       funargs = funargs,
-      logtxt = ifelse(exists("stat_list"), sprintf("bar plot for comparison %s, by %s, filtered for %s, using %s", paste(stat_list,collapse = ", "), group_col, gsub("~", "", rlang::expr_text(enquo(feat_filter))), y_scale),
+      logtxt = ifelse(exists("stat_list"), sprintf("bar plot for comparison %s, by %s, filtered for %s, using %s", paste(stat_list,collapse = ", "), group_col, gsub("~", "", rlang::expr_text(dplyr::enquo(feat_filter))), y_scale),
                       sprintf("bar plot by %s using %s", group_col, y_scale)),
       output = list(p),
       output2 = list(nr = nr, npancol = ncol, npanrow = nrow)
