@@ -28,7 +28,7 @@ mt_clean_validate_se <- function(D){
 
   # add rownames if missing
   #   missing rownames creates issues with functions such as stats_univ_lm
-  if(is.null(rownames(D))) rownames(D) <- seq(1, nrow(D))
+  if(is.null(rownames(D))) rownames(D) <- paste0("x", seq(1, nrow(D)))
 
   # check colData column names are R valid
   samp_col_names <- D %>% colData() %>% colnames()
