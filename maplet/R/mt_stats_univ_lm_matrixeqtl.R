@@ -52,7 +52,7 @@ mt_stats_univ_lm_matrixeqtl <- function(D, formula, stat_name, samp_filter) {
   }
 
   # validate formula (can't contain random or interaction effects)
-  strform <- formula %>% as.character() %>% .[[2]]
+  strform <- formula %>% format() 
   if (grepl("\\|", strform)) stop(sprintf("Formula seems to contain a random effect. Linear mixed models not supported for MatrixEQTL. %s", strform))
   # this could be implemented later:
   if (grepl("\\:", strform) || grepl("\\*", strform)) stop(sprintf("Formula seems to contain a interaction effect. Currently not supported for MatrixEQTL. %s", strform))
