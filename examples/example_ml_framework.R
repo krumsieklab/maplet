@@ -38,7 +38,10 @@ clin <- clin[,-6]
 metinfo <- read_excel(localfile, sheet='plasma annotations') %>%
   mutate(name = BIOCHEMICAL)
 
-
+# assemble into SE, and make maplet compatible
+D <- SummarizedExperiment(assay=t(data), colData = clin, rowData = metinfo) %>%
+  mt_clean_validate_se() %>%
+  mt_pre_impute_min()
 
 ### ---------------- BINARY OUTCOME ---------------- ###
 D1 <- D
@@ -93,7 +96,7 @@ D2 %>% mt_reporting_html(file = "mt_ml_framework_continuous.html",
 
 ### ---------------- WITH COVARIATES ---------------- ###
 D3 <- D
-D3 %<>% D1 %<>% mt_reporting_heading("Covariates Included") %>%
+D3 %<>% mt_reporting_heading("Covariates Included") %>%
   mt_reporting_heading("Continous outcome - glmnet", lvl=2) %>%
   mt_ml_repeat(ml_fun = mtml_glmnet,
                ml_name = "continuous_lasso",
