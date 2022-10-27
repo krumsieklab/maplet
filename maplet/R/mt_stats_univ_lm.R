@@ -14,8 +14,11 @@
 #' @param stat_name Name under which this comparison will be stored, must be unique to all other statistical results.
 #' @param samp_filter Term which samples to filter to first (e.g. used if the data contains >2 groups but the user wants to
 #'    run a two-group comparison).
-#' @param all_terms Whether to return all terms in formula in the statistical results table. Default: F.
+#' @param all_terms Whether to return all terms in formula in the statistical results table. Default: FALSE.
 #' @param n_cores Number of cores to use for mclapply. More than one core will not work on Windows platforms. Default: 1.
+#' @param return_warnings Whether to add a Boolean column indicating whether a feature model
+#'    returned a warning. Currently only checks for a failure to converge warnings. See
+#'    \code{\link[lme4]{isSingular()}}. Default: FALSE.
 #'
 #' @return $result$output: Statistics object.
 #'
@@ -38,8 +41,9 @@ mt_stats_univ_lm <- function(D,
                              formula,
                              stat_name,
                              samp_filter,
-                             all_terms = F,
-                             n_cores = 1) {
+                             all_terms = FALSE,
+                             n_cores = 1,
+                             return_warnings = FALSE) {
 
   # validate arguments
   stopifnot("SummarizedExperiment" %in% class(D))
@@ -122,9 +126,16 @@ mt_stats_univ_lm <- function(D,
   f_tidy_tidy <- function(m, ...){
     if(is.null(m))
       return(tibble::tibble(term = outvar_term))
-    f_tidy(m) %>%
-      dplyr::mutate(formula = as.character(attr(m,'terms'))) %>%
-      dplyr::select(term, formula, dplyr::everything())
+    if(return_warnings){
+      f_tidy(m) %>%
+        dplyr::mutate(formula = as.character(attr(m,'terms'))) %>%
+        dplyr::select(term, formula, dplyr::everything()) %>%
+        dplyr::mutate(singular_warning = attr(m, 'singular_warning_generated'))
+    }else{
+      f_tidy(m) %>%
+        dplyr::mutate(formula = as.character(attr(m,'terms'))) %>%
+        dplyr::select(term, formula, dplyr::everything())
+    }
   }
 
 
@@ -217,6 +228,7 @@ mt_stats_univ_lm <- function(D,
     # attach linear model terms as attribute to the variable
     # (only way to make this compatible for both lm and anova, because they are very different data structures)
     attr(mod, 'terms') <- terms
+    if(return_warnings == TRUE) attr(mod, 'singular_warning_generated') <- lme4::isSingular(mod)
 
     # return
     mod

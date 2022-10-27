@@ -4,7 +4,7 @@
 \alias{mt_anno_select}
 \title{Select columns from annotation data frame}
 \usage{
-mt_anno_select(D, anno_type, col_names)
+mt_anno_select(D, anno_type, term)
 }
 \arguments{
 \item{D}{\code{SummarizedExperiment} input.}

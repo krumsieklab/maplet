@@ -9,11 +9,14 @@ mt_ml_repeat(
   ml_fun,
   ml_name,
   response_col,
+  response_type = "binary",
+  covar_cols,
   sampling_method = "cv",
   num_folds,
   rand_seed,
   mod_args = list(),
-  pred_args = list()
+  pred_args = list(),
+  pos_class
 )
 }
 \arguments{
@@ -24,6 +27,11 @@ mt_ml_repeat(
 \item{ml_name}{Name under which the results will be stored.}
 
 \item{response_col}{Name of the colData column containing the data labels.}
+
+\item{response_type}{Indicates the type of learning task. One of "binary" or
+"continuous". Default: "binary".}
+
+\item{covar_cols}{An optional vector of covariate columns taken from colData.}
 
 \item{sampling_method}{Type of cross-validation / sampling method using. Must be one of: cv (add more later).
 Default: cv.}
@@ -39,9 +47,12 @@ implementations for default parameters used. Default: empty list.}
 predict.glmnet accepts the parameter s, which supplies the penalty parameter lambda at which prediction are
 required. See details of each function in mtml_algorithms for parameter lists for each algorithm-specific
 predict function. See mpalet-implemented ml functions for default parameters used. Default: empty list.}
+
+\item{pos_class}{Required if response_type = "binary". Indicates which value in the response column
+represents the positive class.}
 }
 \value{
-List containing a list of results for each fold.
+result$output: List containing a list of results for each fold.
 }
 \description{
 Performs one of the following cross-validation / sampling methods for a provided machine learning
