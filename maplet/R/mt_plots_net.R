@@ -94,7 +94,8 @@ mt_plots_net <- function(D,
   df$edges <- data.frame(from = data_plot[,which(colnames(data_plot)=="var1")], to = data_plot[,which(colnames(data_plot)=="var2")], weight = cor.scaled/10)
   df$vertices <- nodes$label
 
-  adj <- as.matrix(dils::AdjacencyFromEdgelist(df$edges, check.full = TRUE))
+  # THIS FUNCTION MUST BE REPLACED - dils is archived
+  #adj <- as.matrix(dils::AdjacencyFromEdgelist(df$edges, check.full = TRUE))
   colnames(adj[[1]])<- as.character(nodes$label[match(adj[[2]],nodes$ids)])
   rownames(adj[[1]])<- as.character(nodes$label[match(adj[[2]],nodes$ids)])
   mm.net <- network::network(adj[[1]], layout = "kamadakawai", directed = FALSE)

@@ -30,7 +30,6 @@ Imports:
     broom,
     broom.mixed,
     data.table,
-    dils,
     dplyr,
     DT,
     formula.tools,
