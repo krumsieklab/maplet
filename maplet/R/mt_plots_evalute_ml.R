@@ -403,7 +403,7 @@ create_mse_cor_plots <- function(num_folds, pred_list, labels, test_idx_list, al
     avg_cor <- mean(mse_cor_vals[["cor"]])
 
     all_pred <- unlist(pred_list)
-    ord_labels <- sapply(1:num_folds, function(x){labels[test_idx_list[[x]]]}) %>% unlist()
+    ord_labels <- lapply(1:num_folds, function(x){labels[test_idx_list[[x]]]}) %>% unlist()
 
     af_mse <- mean((ord_labels - all_pred)^2,na.rm=TRUE)
     af_cor <- cor(ord_labels, all_pred)
