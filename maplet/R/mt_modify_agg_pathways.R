@@ -92,7 +92,7 @@ mt_modify_agg_pathways <- function(D, pw_col, method) {
   res <- try(rowData(D) %>% as.data.frame() %>% tibble::as.tibble() %>% dplyr::group_by_(pw_col), silent = TRUE)
   copyworks <- !(class(res) == "try-error")
 
-  if (copyworks) {
+  if (all(copyworks)) {
     # check which variables can be copied [all of this can probable be done simpler]
     copyover <- sapply(colnames(rowData(D)), function(c) {
       # verify variable, there must be only one value for each instance

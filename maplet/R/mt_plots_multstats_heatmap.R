@@ -3,7 +3,7 @@
 #' Generate a heatamp for a list of statistical results using \code{pheatmap::pheatmap}.
 #'
 #' @param D \code{SummarizedExperiment} input.
-#' @param stat_list List of stat names to plot. Default: NA (for all stat objects in D).
+#' @param stat_list List of stat names to plot. Default: empty list (for all stat objects in D).
 #' @param cutoff The p.adj value significance cutoff.
 #' @param feat_anno_col The rowData() column name to use as column annotation.
 #' @param signif_mark Marker used to indicate significant p-values. Default: "•".
@@ -29,7 +29,7 @@
 #'
 #' @export
 mt_plots_multstats_heatmap <- function(D,
-                                       stat_list=NA,
+                                       stat_list=list(),
                                        cutoff,
                                        feat_anno_col,
                                        signif_mark = "•",
@@ -67,7 +67,7 @@ mt_plots_multstats_heatmap <- function(D,
   right_bound <- cutoff
 
   # if NA, stat_list is all stat results
-  if(is.na(stat_list)){
+  if(length(stat_list) == 0){
     stat_list <- maplet::mtm_res_get_entries(D, "stats")%>%
       purrr::map_chr(~.x$output$name)
   }
