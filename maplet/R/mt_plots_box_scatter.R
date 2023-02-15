@@ -19,6 +19,7 @@
 #' @param fit_line Add fit line? Default: T.
 #' @param fit_line_se Add standard error range? Default: T.
 #' @param ggadd Further elements/functions to add (+) to the ggplot object. Default: NULL.
+#' @param pages Whether to divide plots into pages (repeats legend and y-axis label). Default F.
 #' @param ... Additional expression directly passed to aes() of ggplot, can refer to colData.
 #'
 #' @return if plot_type = "box", $result$output: plot, box plot
@@ -59,6 +60,7 @@ mt_plots_box_scatter <- function(D,
                                  fit_line = T,
                                  fit_line_se = T,
                                  ggadd = NULL,
+                                 pages = F,
                                  ...){
 
   stopifnot("SummarizedExperiment" %in% class(D))
@@ -68,7 +70,7 @@ mt_plots_box_scatter <- function(D,
   # get argument names from dots
   n <- sapply(as.list(substitute(list(...)))[-1L], deparse)
   dot_args <- names(n)
-  
+
   # check for defunct argument names
   if ("metab_filter" %in% dot_args) stop("You used the old MT naming convention metab_filter. Should be: feat_filter")
   if ("metab_sort" %in% dot_args) stop("You used the old MT naming convention metab_sort. Should be: feat_sort")
@@ -138,7 +140,7 @@ mt_plots_box_scatter <- function(D,
   # check x is a column in dataset
   mainvar <- x %>% dplyr::quo_name()
   if(mainvar %in% colnames(dummy) == F) stop(glue::glue("No column in plot data frame with name \"{mainvar}\"."))
-  
+
   if(!full_info){
     # filter down only to the variables needed for plotting
     # need to parse x and ... list
@@ -261,8 +263,17 @@ mt_plots_box_scatter <- function(D,
   if (length(unique(stat$name))==0) {
     p <- list(ggplot() + geom_text(aes(x=0, y=0, label='no plots'), size=10))
     output2 <- NULL
-  } else {
-    p <- p + facet_wrap(.~name, scales = "free_y", ncol=2)
+  } else if(pages) {
+
+    npages <- ceiling(length(unique(stat$name))/8)
+    tmp <- lapply(1:npages, function(x){
+      p + ggforce::facet_wrap_paginate(.~name, scales = "free", ncol = 2, nrow = 4, page=x)
+      })
+    p <- ggpubr::ggarrange(plotlist = tmp, ncol=1)
+    p <- ggpubr::annotate_figure(p, top = ggpubr::text_grob(plottitle))
+    output2 <- ceiling(length(unique(stat$name))/2)
+  }else {
+    p <- p + facet_wrap(.~name, scales = "free", ncol=2)
     p <- list(p)
     output2 <- ceiling(length(unique(stat$name))/2)
   }

@@ -21,6 +21,7 @@ mt_plots_box_scatter(
   fit_line = T,
   fit_line_se = T,
   ggadd = NULL,
+  pages = F,
   ...
 )
 }
@@ -57,6 +58,8 @@ Makes plotting more flexible but can render SE objects huge. Default: F}
 \item{fit_line_se}{Add standard error range? Default: T.}
 
 \item{ggadd}{Further elements/functions to add (+) to the ggplot object. Default: NULL.}
+
+\item{pages}{Whether to divide plots into pages (repeats legend and y-axis label). Default F.}
 
 \item{...}{Additional expression directly passed to aes() of ggplot, can refer to colData.}
 }
