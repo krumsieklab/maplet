@@ -123,6 +123,7 @@ mt_anno_pathways_hmdb <- function(D,
     dplyr::filter(!is.na(ID)) %>%
     dplyr::distinct(HMDB_id, ID) %>%
     tidyr::nest(ID, .key = ID) %>%
+    #tidyr::nest(.key = "ID") %>%
     dplyr::mutate(ID =
              ID %>%
              unlist(recursive = FALSE) %>%
@@ -151,7 +152,7 @@ mt_anno_pathways_hmdb <- function(D,
 
 
   funargs <- mti_funargs()
-  D %<>% 
+  D %<>%
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf('added pathway annotations using the %s pathway database', pwdb_name)
