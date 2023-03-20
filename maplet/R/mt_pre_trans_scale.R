@@ -37,6 +37,8 @@ mt_pre_trans_scale <- function(D, center_data=T, scale_data=T, ref_samples) {
 
     # get and filter
     Da_filtered <- t(assay(D))[samples.used,]
+    # Reset Da to not include colData
+    Da <- t(assay(D))
 
     if(center_data == T){
       # center by mean of selected samples
