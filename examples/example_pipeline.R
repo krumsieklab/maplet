@@ -340,7 +340,8 @@ D1 <- D1 %>%
   mt_post_multtest(stat_name = "GGM", method = "BH") %>%
   # plot network and color according to age analysis
   # NOTE: THIS FUNCTION CAN TAKE SEVERAL MINUTES TO RUN
-  mt_plots_net(stat_name = "GGM", cor_filter = p.adj < 0.05, node_coloring = "Age met") %>%
+  # NOTE: This function temporarily unavailable.
+  #mt_plots_net(stat_name = "GGM", cor_filter = p.adj < 0.05, node_coloring = "Age met") %>%
   {.}
 
 
