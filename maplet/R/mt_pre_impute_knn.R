@@ -217,7 +217,6 @@ imputeKNN <- function(dat,
     D2list <- lapply(incom.vars, function(j) {
       varsel <- which(abs(Cor[j,])>cor.var.sel)    # ist j selbst dabei, ist aber ok
       if(length(varsel)>10) varsel <- order(abs(Cor[j,]),decreasing=T)[1:11]
-      if(length(varsel)<=10) varsel <- order(abs(Cor[j,]),decreasing=T)[1:length(varsel)]
       D2 <- as.matrix(stats::dist(scale(dat[,varsel])),upper=T,diag=T)
       if(any(is.na(D2))) {
         D2a <- as.matrix(stats::dist(scale(dat)),upper=T,diag=T)*sqrt(length(varsel)/ncol(dat))
