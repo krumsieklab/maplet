@@ -15,10 +15,17 @@
 #'       \item{df - assay}
 #'       \item{cd - colData data frame}
 #'       \item{rd - rowData data frame}
+#'       \item{st - a named list containing the following objects:}
+#'       \itemize{
+#'          \item{table - statistical data frame; must contain the columns: var, statistic, and p.value}
+#'          \item{name - name of the statistical comparison, must be unique in the pipeline}
+#'          \item{samples.used - logical vector of samples used in the statistical comparison}
+#'       }
+#'       \item{pt - a ggplot object or list of ggplot objects}
 #'    }
 #' }
 #'
-#' @return
+#' @return Named list of objects. See description.
 #'
 #' @examples
 #' \dontrun{# remove unnecessary columns in colData
@@ -34,7 +41,7 @@
 #' @export
 mt_wrapper <- function(D, code){
 
-  VALID_RESULT_NAMES <- c("df", "cd", "rd")
+  VALID_RESULT_NAMES <- c("df", "cd", "rd", "pt", "st")
 
   # verify D is SE
   stopifnot("SummarizedExperiment" %in% class(D))
@@ -81,16 +88,51 @@ mt_wrapper <- function(D, code){
     rowData(D) <- S4Vectors::DataFrame(results$rd)
   }
 
-  # ADD: code for storing plots (?)
+  # perform checks, add statistical results to output
+  if('st' %in% res_names){
+    # check all required list elements present
+    st_req_names <- c('table', 'name', 'samples.used')
+    req_missing <- setdiff(st_req_names, names(results$st))
+    if(length(req_missing)!=0) stop(glue::glue("The following required names are missing from returned stats list: {req_missing}"))
 
-  # ADD: code for storing statistical results (?)
+    # check all required columns present
+    tab_req_cols <- c('var', 'statistic', 'p.value')
+    req_missing <- setdiff(tab_req_cols, colnames(results$st$table))
+    if(length(req_missing)!=0) stop(glue::glue("The following required columns are missing from returned statistical table: {glue::glue_collapse(req_missing, sep = ', ')}"))
+
+    # check samples.used is equal to the number of samples and boolean
+    if(length(results$st$samples.used) != ncol(D)) stop("Length of returned vector samples.used must be equal to the number of samples.")
+    if(!is.logical(results$st$samples.used)) stop("Returned vector samples.used must be logical.")
+
+    # check stat_name is unique
+    if (results$st$name %in% unlist(maplet::mtm_res_get_entries(D, "stats") %>% purrr::map("output") %>% purrr::map("name"))) stop(sprintf("stat element with stat_name '%s' already exists",results$st$name))
+
+    output = results$st
+  }else{
+    output = NULL
+  }
+
+  # perform checks, add plots to output2
+  if('pt' %in% res_names){
+    # check if object or element list can be plotted
+    if(("gg" %in% class(results$pt)) | ("gg" %in% class(results$pt[[1]]))){
+      output2 = results$pt
+    }else{
+      stop("Returned plot object must by a ggplot object or a list of ggplot objects.")
+    }
+
+  }else{
+    output2 = NULL
+  }
+
 
   funargs <- mti_funargs()
   D %<>%
     mti_generate_result(
       funargs = funargs,
-      #logtxt = cat(paste0(c("The following code block was executed: ", body(code)), collapse ='\n'))
-      logtxt = paste0(c("The following code block was executed: ", body(elisa_code)), collapse ='\n')
+      logtxt = paste0(c("The following code block was executed: ", body(code)), collapse ='\n'),
+      output = output,
+      output2 = output2
     )
 
   # return

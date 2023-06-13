@@ -7,7 +7,7 @@
 mt_wrapper(D, code)
 }
 \value{
-
+Named list of objects. See description.
 }
 \description{
 This function allows the user to apply a block of non-maplet code on a maplet-SE object while
@@ -25,6 +25,13 @@ that would make it maplet-incompatible. The code block must satisfy the followin
       \item{df - assay}
       \item{cd - colData data frame}
       \item{rd - rowData data frame}
+      \item{st - a named list containing the following objects:}
+      \itemize{
+         \item{table - statistical data frame; must contain the columns: var, statistic, and p.value}
+         \item{name - name of the statistical comparison, must be unique in the pipeline}
+         \item{samples.used - logical vector of samples used in the statistical comparison}
+      }
+      \item{pt - a ggplot object or list of ggplot objects}
    }
 }
 }
