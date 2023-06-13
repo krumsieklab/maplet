@@ -68,10 +68,10 @@ mt_load_merge_se_new <- function(D1,
   results_from = match.arg(results_from)
 
   # make data frame because tibble creates issues with rownames
-  assay1 <- assay(D1) %>% tibble::rownames_to_column("Feature_ID") %>% as.data.frame()
+  assay1 <- assay(D1) %>% as.data.frame() %>% tibble::rownames_to_column("Feature_ID")
   rownames(assay1) <- assay1$Feature_ID
   assay1 %<>% dplyr::select(-Feature_ID)
-  assay2 <- assay(D2) %>% tibble::rownames_to_column("Feature_ID") %>% as.data.frame()
+  assay2 <- assay(D2) %>% as.data.frame() %>% tibble::rownames_to_column("Feature_ID")
   rownames(assay2) <- assay2$Feature_ID
   assay2 %<>% dplyr::select(-Feature_ID)
 
@@ -309,7 +309,7 @@ mt_load_merge_se_new <- function(D1,
     unique_rd1_cols <- colnames(rd1)[colnames(rd1) %in% colnames(rd2)==F]
     unique_rd2_cols <- colnames(rd2)[colnames(rd2) %in% colnames(rd1)==F]
 
-    if(unique_rd1_cols != 0 | unique_rd2_cols != 0){
+    if(length(unique_rd1_cols) != 0 | length(unique_rd2_cols) != 0){
 
       if(anno_cols_identical) stop("The flag anno_cols_identical is set to TRUE. Annotation columns are not identical.")
 
@@ -331,14 +331,13 @@ mt_load_merge_se_new <- function(D1,
   feat_id_col <- feat_id_col1
 
   # order assay columns and rows
-  joined
   # rearrange cd rows to match assay column order
   rownames(cd) <- cd[,samp_id_col]
-  View(cd[match(colnames(joined), cd[,samp_id_col]),])
+  cd <- cd[match(colnames(joined), cd[,samp_id_col]),]
 
   # rearrange rd rows to match assay row order
   rownames(rd) <- rd[,feat_id_col]
-  View(rd[match(rownames(joined), rd[,feat_id_col]),])
+  rd <- rd[match(rownames(joined), rd[,feat_id_col]),]
 
   if(results_from == 'none'){
     results <- list()
