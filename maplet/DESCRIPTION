@@ -53,7 +53,6 @@ Imports:
     mgcv,
     MLmetrics,
     openxlsx,
-    pathview,
     pheatmap,
     plyr,
     pracma,
@@ -76,7 +75,6 @@ Imports:
     tictoc,
     tidyr,
     tidyselect,
-    umap,
     uuid
 License: GPL-3
 Encoding: UTF-8
@@ -92,6 +90,8 @@ Suggests:
     knitr,
     metabolighteR,
     network,
+    pathview,
+    umap,
     visNetwork
 VignetteBuilder: knitr
 biocViews: WorkflowStep, Metabolomics

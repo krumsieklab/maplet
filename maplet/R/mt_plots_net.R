@@ -32,6 +32,8 @@ mt_plots_net <- function(D,
                         html_outfile,
                         height = 500) {
 
+  stop("This function is currently not available, since the dils package has been removed from CRAN. This will be fixed soon.")
+
   ## check input
   stopifnot("SummarizedExperiment" %in% class(D))
   if(missing(stat_name))
@@ -138,7 +140,7 @@ mt_plots_net <- function(D,
 
   ## add status information & plot
   funargs <- mti_funargs()
-  D %<>% 
+  D %<>%
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("Correlation Network, aes: %s", stat_name),

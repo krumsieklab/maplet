@@ -96,6 +96,8 @@ mt_plots_pathview <- function(D,
                               limit = list(gene = 1, cpd = 1),
                               ...) {
 
+  if("pathview" %in% installed.packages() == FALSE) stop("Required package \'umap\' is not installed.")
+
   requireNamespace("pathview")
   data("bods", package = "pathview")
 

@@ -36,19 +36,22 @@ mt_plots_umap <- function(D,
                           ggadd=NULL,
                           ...) {
 
+  # check umap package is installed
+  if("umap" %in% installed.packages() == FALSE) stop("Required package \'umap\' is not installed.")
+
   # validate arguments
   stopifnot("SummarizedExperiment" %in% class(D))
 
   # get argument names from dots
   n <- sapply(as.list(substitute(list(...)))[-1L], deparse)
   dot_args <- names(n)
-  
+
   # check for defunct argument names
   if ("scaledata" %in% dot_args) stop("You used the old MT naming convention scaledata Should be: scale_data")
   if ("labelby" %in% dot_args) stop("You used the old MT naming convention labelby Should be: label_col")
   if ("textrepel" %in% dot_args) stop("You used the old MT naming convention textrepel Should be: text_repel")
   if ("store.matrices" %in% dot_args) stop("You used the old MT naming convention store.matrices Should be: store_matrices")
-  
+
   # helper function to combine two aesthetics, e.g. from aes() and aes_string()
   combine_aes <- function(...) {
     v <- c(...)
@@ -92,7 +95,7 @@ mt_plots_umap <- function(D,
 
   # add status information & plot
   funargs <- mti_funargs()
-  D %<>% 
+  D %<>%
     mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("UMAP, label_col: %s, aes: %s", label_col,  mti_dots_to_str(...)),
