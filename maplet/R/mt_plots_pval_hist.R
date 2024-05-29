@@ -35,7 +35,7 @@ mt_plots_pval_hist <- function(D, stat_list=NULL) {
     p <- st %>%
         ggplot(aes(x=p.value)) +
         geom_histogram(binwidth=bwidth,fill="white",colour="black") +
-        xlim(0,1) +
+        xlim(-0.01,1) +
         ggtitle(glue::glue("'{statname}' p-values"))
     p
     })
