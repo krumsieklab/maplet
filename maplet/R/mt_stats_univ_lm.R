@@ -288,6 +288,14 @@ mt_stats_univ_lm <- function(D,
 
   ## remove environments from all models (blows up when saving to file)
   for (i in 1:length(models)) {
+    # skip model if NULL
+    # if we don't do this, a very strange corruption of the models list can occur.
+    if (is.null(models[[i]])) {
+      print("Skipping NULL model")
+      print(i)
+      next  # Skip to the next iteration if NULL
+    }
+    # set everything to NULL that is not needed
     attr(models[[i]], "terms") <- NULL
     if (!("lmerModLmerTest" %in% class(models[[i]]))) {
       # regular LM
