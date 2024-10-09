@@ -291,8 +291,6 @@ mt_stats_univ_lm <- function(D,
     # skip model if NULL
     # if we don't do this, a very strange corruption of the models list can occur.
     if (is.null(models[[i]])) {
-      print("Skipping NULL model")
-      print(i)
       next  # Skip to the next iteration if NULL
     }
     # set everything to NULL that is not needed
