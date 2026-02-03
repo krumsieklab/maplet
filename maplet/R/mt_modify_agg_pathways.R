@@ -27,7 +27,7 @@
 #'   mt_anno_pathways_remove_redundant(feat_id = "HMDB", pw_id = "kegg_db") %>%
 #'   mt_modify_agg_pathways(pw_col="kegg_db", method="aggmean") %>%}
 #'
-#' @author JK
+#' @author JK JCB
 #'
 #' @export
 mt_modify_agg_pathways <- function(D, pw_col, method) {
@@ -64,14 +64,20 @@ mt_modify_agg_pathways <- function(D, pw_col, method) {
     # for eigenvalue methods, matrix cannot have any NAs
     if (any(is.na(X))) stop("no NA values allowed for 'eigen' method")
     # calc
-    res <- up %>% lapply(function(g) {
-      met <- removeNAs(sapply(p, function(v){g %in% v}), replaceWith=F)
-      pca = stats::prcomp(as.data.frame(X[,met]))
-      list(pc1=pca$x[,1],
-           expvar=(pca$sdev)^2 / sum(pca$sdev^2) )
-    })
-    # assemble into matrix
-    M = as.data.frame(sapply(res, function(x){x$pc1}))
+    res <- setNames(lapply(up, function(g) {
+    ## safer membership vector: never drops entries due to NA removal
+    met <- vapply(p, function(v) is.character(v) && (g %in% v), logical(1))
+
+    pca <- stats::prcomp(as.data.frame(X[, met, drop = FALSE]))
+
+    list(
+        pc1    = pca$x[, 1],
+        expvar = (pca$sdev)^2 / sum(pca$sdev^2)
+    )
+    }), up)
+
+    ## assemble into matrix with proper column names
+    M <- as.data.frame(sapply(res, function(x) x$pc1), check.names = FALSE)
     # return explained variances in output
     output$expvar = purrr::map(res, "expvar")
 
@@ -89,7 +95,7 @@ mt_modify_agg_pathways <- function(D, pw_col, method) {
   colnames(M) <- make.names(full.names)
 
   # check if data can be copied by grouping the pw_col variable
-  res <- try(rowData(D) %>% as.data.frame() %>% tibble::as.tibble() %>% dplyr::group_by_(pw_col), silent = TRUE)
+  res <- try(rowData(D) %>% as.data.frame() %>% tibble::as.tibble() %>% dplyr::group_by(.data[[pw_col]]), silent = TRUE)
   copyworks <- !(class(res) == "try-error")
 
   # second check is there to avoid problems caused by nested pathways
@@ -97,7 +103,7 @@ mt_modify_agg_pathways <- function(D, pw_col, method) {
     # check which variables can be copied [all of this can probable be done simpler]
     copyover <- sapply(colnames(rowData(D)), function(c) {
       # verify variable, there must be only one value for each instance
-      all( (rowData(D) %>% as.data.frame() %>% tibble::as.tibble() %>% dplyr::group_by_(pw_col) %>% dplyr::summarise(dplyr::n_distinct(!!rlang::sym(c))))[[2]] ==1 )
+      all( (rowData(D) %>% as.data.frame() %>% tibble::as.tibble() %>% dplyr::group_by(.data[[pw_col]]) %>% dplyr::summarise(dplyr::n_distinct(!!rlang::sym(c))))[[2]] ==1 )
     })
     # generate new rowData
     rd <- rowData(D) %>% as.data.frame() %>% tibble::as.tibble() %>% dplyr::filter(!duplicated(!!rlang::sym(pw_col))) %>%
@@ -123,9 +129,9 @@ mt_modify_agg_pathways <- function(D, pw_col, method) {
   )
 
   # add status information
-  funargs <- mti_funargs()
+  funargs <- maplet:::mti_funargs()
   newD %<>%
-    mti_generate_result(
+    maplet:::mti_generate_result(
       funargs = funargs,
       logtxt = sprintf("pathway aggregation by '%s', %d pathway scores generated", pw_col, nrow(newD))
     )
@@ -135,10 +141,3 @@ mt_modify_agg_pathways <- function(D, pw_col, method) {
 
 
 }
-
-
-
-
-
-
-
