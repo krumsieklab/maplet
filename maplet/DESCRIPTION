@@ -91,6 +91,7 @@ Suggests:
     metabolighteR,
     network,
     pathview,
+    rox,
     umap,
     visNetwork
 VignetteBuilder: knitr
