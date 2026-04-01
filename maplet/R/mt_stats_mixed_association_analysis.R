@@ -26,22 +26,29 @@ mt_stats_mixed_association_analysis <- function(D,
   
   
   # merge data with sample info
-  Ds <- D %>% maplet:::mti_format_se_samplewise() # NOTE: No explosion of dataset size, no gather() - 6/2/20, JK
+  Ds <- D %>% mti_format_se_samplewise() # NOTE: No explosion of dataset size, no gather() - 6/2/20, JK
+  
+  # convert outcome variable once (not inside each loop iteration)
+  if(outcome_type=='binary'){
+    Ds %<>% mutate(!!sym(outcome) := as.factor(as.matrix(!!sym(outcome))))
+  } else if(outcome_type=='numeric'){
+    Ds %<>% mutate(!!sym(outcome) := as.numeric(as.matrix(!!sym(outcome))))
+  }
   
   # metabolites in data
   mets <- D %>% assay() %>% rownames()
   
   # loop over metabolites
   univ_stats <- lapply(mets, function(x){
+    # wrap metabolite name in backticks to handle special characters
+    x_safe <- paste0('`', x, '`')
     # formula for this metabolite
     if(is.null(conf_formula)==F){
-      this_formula <- as.formula(glue('{outcome} ~ {x} + {conf_formula}'))  
+      this_formula <- as.formula(glue('{outcome} ~ {x_safe} + {conf_formula}'))  
     } else{
-      this_formula <- as.formula(glue('{outcome} ~ {x}'))  
+      this_formula <- as.formula(glue('{outcome} ~ {x_safe}'))  
     }
     if(outcome_type=='binary'){
-      # turn the outcome variable into factor
-      Ds %<>% mutate(!!sym(outcome) := as.factor(as.matrix(!!sym(outcome))))
       # logistic regression
       this_fit <- lme4::glmer(this_formula, data =Ds, family = binomial,
                               nAGQ = 2)
@@ -49,8 +56,6 @@ mt_stats_mixed_association_analysis <- function(D,
       this_res <- this_fit %>% summary() %>% coefficients() %>% data.frame()
       names(this_res) <- c('estimate', 'std_error', 'statistic', 'p_value')
     } else if(outcome_type=='numeric'){
-      # turn the outcome variable into factor
-      Ds %<>% mutate(!!sym(outcome) := as.numeric(as.matrix(!!sym(outcome))))
       # linear regression
       this_fit <- lme4::lmer(this_formula, data =Ds)
       # results summary
