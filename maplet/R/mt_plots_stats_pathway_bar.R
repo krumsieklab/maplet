@@ -8,6 +8,7 @@
 #' @param group_col The rowData variable used to aggregate variables.
 #' @param color_col OPTIONAL. A rowData variable used to color barplot. Default NULL.
 #' @param y_scale Plot percentage or frequency of variables. Values c("fraction","count"). Default "fraction".
+#' @param label_type Type of labels to show on bars. Values c("fraction","count"). Default "fraction" (shows percentage).
 #' @param sort_by_y Sort pathways in plot according to y_scale. Default FALSE.
 #' @param assoc_sign_col OPTIONAL. Parameter to discriminate between positive and negative associations. Needs to be the name
 #'    of a column in the statistical results indicated by stat_list.
@@ -46,6 +47,7 @@ mt_plots_stats_pathway_bar <- function(D,
                                group_col = "SUB_PATHWAY",
                                color_col = NULL,
                                y_scale = "fraction",
+                               label_type = "fraction",
                                sort_by_y = FALSE,
                                assoc_sign_col,
                                add_empty = FALSE,
@@ -295,13 +297,19 @@ mt_plots_stats_pathway_bar <- function(D,
     }
 
     # flip axes and add annotations on bars
+    label_format <- if(label_type == "count") {
+      function(count, fraction) sprintf("%d", count)
+    } else {
+      function(count, fraction) sprintf("%.2f%%", fraction*100)
+    }
+
     p <- p +
       coord_flip() +
-      (if(y_scale=="count" & !("association" %in% colnames(data_plot))) {geom_text(data=data_plot, aes(label, !!sym(y_scale), label= sprintf("%.2f%%", fraction*100)),
+      (if(y_scale=="count" & !("association" %in% colnames(data_plot))) {geom_text(data=data_plot, aes(label, !!sym(y_scale), label= label_format(count, fraction)),
                                                                                position = position_dodge(width=0.9), hjust = -0.1, size=2.5)}) +
-      (if(y_scale=="count" & "association" %in% colnames(data_plot)) {geom_text(data=dplyr::filter(data_plot, association=="positive"), aes(label, !!sym(y_scale), group= association,label= sprintf("%.2f%%", fraction*100)),
+      (if(y_scale=="count" & "association" %in% colnames(data_plot)) {geom_text(data=dplyr::filter(data_plot, association=="positive"), aes(label, !!sym(y_scale), group= association,label= label_format(count, fraction)),
                 position = position_dodge(width=0.9), hjust = -0.1, size=2.5)}) +
-      (if(y_scale=="count" & "association" %in% colnames(data_plot)) {geom_text(data=data_plot %>% dplyr::filter(association=="negative"), aes(label, -!!sym(y_scale), group= association,label= sprintf("%.2f%%", fraction*100)),
+      (if(y_scale=="count" & "association" %in% colnames(data_plot)) {geom_text(data=data_plot %>% dplyr::filter(association=="negative"), aes(label, -!!sym(y_scale), group= association,label= label_format(count, fraction)),
                 position = position_dodge(width=0.9), hjust = 1.1, size=2.5)}) +
       facet_wrap(~comp)
 
