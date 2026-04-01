@@ -2,35 +2,30 @@
 #'
 #' @description
 #' Loads annotations and merges them into current SummarizedExperiment.
-#' Performs "left-joins", i.e. leaves the original SE unchanged and just adds information where it can be mapped.
-#' Can load annotations for both features (rowData) and samples (colData).
+#' Performs "left-joins": leaves the original SE unchanged and adds info where it can be mapped.
+#' Works for both features (rowData) and samples (colData).
 #'
-#' @description
-#' If annotation fields are already existing, this function will fill up any NAs with the values from the new file.
-#' Existing values are not overwritten.
+#' If annotation fields already exist, this function fills NAs from the new file.
+#' Existing non-NA values are not overwritten.
 #'
-#' @param D \code{SummarizedExperiment} input.
+#' @param D SummarizedExperiment input.
 #' @param file Name of input Excel file.
 #' @param sheet Name or number of sheet.
 #' @param anno_type Either "samples" (colData) or "features" (rowData).
 #' @param anno_id_col Column in annotation file that contains ID information for mapping.
-#' @param data_id_col Column in existing data that contains ID information for mapping. Default: Equal to anno_id_col.
-#' @param no_map_err Throw error (T) or warning (F) if something does not map. Default: F.
-#' @param replace_names_col OPTIONAL. Name of column from new annotation file to use to overwrite colnames (i.e. sample names) of SE. Default: none.
+#' @param data_id_col Column in existing data that contains ID information for mapping. Default: equal to anno_id_col.
+#' @param no_map_err Throw error (TRUE) or warning (FALSE) if something does not map. Default: FALSE.
+#' @param replace_names_col OPTIONAL. Column from new annotation (post-prefix) to overwrite sample names (colnames). Only valid for samples.
+#' @param prefix OPTIONAL. If non-empty, all annotation columns except `anno_id_col` are prefixed before mapping.
 #'
-#' @return rowData or colData: New annotation columns added.
+#' @return SummarizedExperiment with new annotation columns added.
 #'
 #' @examples
 #' \dontrun{
-#'   # Load data, two sheets with sample annotations, and one sheet with feature annotations from the same file
 #'   D <-
-#'   # load raw data
 #'   mt_load_xls(file=file, sheet="data", samples_in_rows=T, id_col="SAMPLE_NAME") %>%
-#'   # sample annotations from metabolomics run
 #'   mt_anno_xls(file=file, sheet="sampleinfo", anno_type="samples", anno_id_col = "SAMPLE_NAME") %>%
-#'   # sample annotations from clinical table
 #'   mt_anno_xls(file=file, sheet="clinicals", anno_type="samples", anno_id_col="SAMPLE_NAME") %>%
-#'   # feature annotations`
 #'   mt_anno_xls(file=file, sheet="metinfo", anno_type="features", anno_id_col="BIOCHEMICAL", data_id_col = "name") %>%
 #'   ...}
 #'
@@ -39,117 +34,155 @@
 #' @import tidyverse
 #'
 #' @export
-mt_anno_xls <-function(D,
-                       file,
-                       sheet,
-                       anno_type,
-                       anno_id_col,
-                       data_id_col = anno_id_col,
-                       no_map_err = F,
-                       replace_names_col = NA) {
+mt_anno_xls <- function(D,
+                        file,
+                        sheet,
+                        anno_type,
+                        anno_id_col,
+                        data_id_col = anno_id_col,
+                        no_map_err = FALSE,
+                        replace_names_col = NA,
+                        prefix = "") {
 
   # validate arguments
   stopifnot("SummarizedExperiment" %in% class(D))
-  if (!(anno_type %in% c("samples","features"))) stop("anno_type must be either 'samples' or 'features'")
-  atype_str <- ifelse(anno_type=="samples", "sample", "feature")
-  
+  if (!(anno_type %in% c("samples", "features")))
+    stop("anno_type must be either 'samples' or 'features'")
+  atype_str <- ifelse(anno_type == "samples", "sample", "feature")
+
   # load excel sheet
-  df <- as.data.frame(readxl::read_excel(path=file,sheet=sheet,col_names=T))
-  
+  df <- as.data.frame(readxl::read_excel(path = file, sheet = sheet, col_names = TRUE))
+
   # ensure that annotation ID column exists and contains no empty cells
-  if (!(anno_id_col %in% colnames(df))) stop(glue::glue("{atype_str} ID column '{anno_id_col}' does not exist in '{basename(file)}, sheet '{sheet}'"))
-  if (any(is.na(df[[anno_id_col]]))) stop(glue::glue("{atype_str} ID column '{anno_id_col}' contains empty cells, '{basename(file)}, sheet '{sheet}'"))
-  rownames(df) <- make.names(df[[anno_id_col]], unique=T)
-  
-  # slightly different behavior for samples or features
-  if (anno_type=="samples") {
+  if (!(anno_id_col %in% colnames(df)))
+    stop(glue::glue("{atype_str} ID column '{anno_id_col}' does not exist in '{basename(file)}', sheet '{sheet}'"))
+  if (any(is.na(df[[anno_id_col]])))
+    stop(glue::glue("{atype_str} ID column '{anno_id_col}' contains empty cells, '{basename(file)}', sheet '{sheet}'"))
+
+  rownames(df) <- make.names(df[[anno_id_col]], unique = TRUE)
+
+  # optionally prefix all annotation columns except the mapping column
+  use_prefix <- !is.null(prefix) && !is.na(prefix) && nzchar(prefix)
+  if (use_prefix) {
+    cols_to_prefix <- setdiff(colnames(df), anno_id_col)
+    colnames(df)[match(cols_to_prefix, colnames(df))] <- paste0(prefix, cols_to_prefix)
+  }
+
+  # effective column name for replace_names_col after optional prefixing
+  replace_names_col_eff <- replace_names_col
+  if (!is.na(replace_names_col_eff) && use_prefix) {
+    replace_names_col_eff <- paste0(prefix, replace_names_col_eff)
+  }
+
+  if (anno_type == "samples") {
     # ensure the data_id_col column exists
-    if (!(data_id_col %in% colnames(colData(D)))) stop(glue::glue("ID column '{data_id_col}' does not exist in current sample annotations of SE"))
-    # ensure no columns in annotation df already exist in colData
-    anno_col_names <- df %>% select(-one_of(anno_id_col)) %>% colnames()
-    data_col_names <- colData(D) %>% as.data.frame() %>% select(-one_of(data_id_col)) %>% colnames()
-    if(any(anno_col_names %in% data_col_names)) stop("Annotation column names already exist in colData.")
-    # check that all samples are found in the colnames of the existing dataset
+    if (!(data_id_col %in% colnames(colData(D))))
+      stop(glue::glue("ID column '{data_id_col}' does not exist in current sample annotations of SE"))
+
+    # check that all samples are found
     m <- match(df[[anno_id_col]], colData(D)[[data_id_col]])
     if (any(is.na(m))) {
-      msg <- sprintf("The following sample IDs could not be found in the existing data matrix: %s",paste0(df[[data_id_col]][is.na(m)],collapse=","))
+      msg <- sprintf("The following sample IDs could not be found in the existing data: %s",
+                     paste0(df[[anno_id_col]][is.na(m)], collapse = ","))
       if (no_map_err) stop(msg)
-      # else mti_logwarning(msg)
     }
-    # check no annotations are duplicated
-    if(any(duplicated(df[!is.na(m),anno_id_col]))) stop(glue::glue("The ID column '{anno_id_col}' of the annotation data frame contains duplicated values."))
-    # make everything a string
+
+    # check no annotations are duplicated for mapped rows
+    if (any(duplicated(df[!is.na(m), anno_id_col])))
+      stop(glue::glue("The ID column '{anno_id_col}' of the annotation data frame contains duplicated values."))
+
+    # make everything a string (for safe joins)
     df[[anno_id_col]] %<>% as.character()
     colData(D)[[data_id_col]] %<>% as.character()
-    # merge data frames
-    newdf <- coalesce_join(data.frame(colData(D), check.names=F), df, by = setNames(anno_id_col ,data_id_col), join = dplyr::left_join)
-    newdf[[anno_id_col]] <- newdf[[data_id_col]] # make sure anno column name also exists (if different from data column name)
-    stopifnot(all.equal(newdf[[data_id_col]],colData(D)[[data_id_col]])) # to make sure nothing was mixed up
-    rownames(newdf) <- colnames(D)
-    colData(D) <- DataFrame(newdf)
 
-    # replace_names_col?
-    if (!is.na(replace_names_col)) {
-      # copy field, set colnames
-      cn = newdf[[replace_names_col]]
-      colnames(D) = cn
+    # merge with NA-coalescing; allow existing columns (do not stop on name collisions)
+    newdf <- coalesce_join(
+      data.frame(colData(D), check.names = FALSE),
+      df,
+      by   = setNames(anno_id_col, data_id_col),
+      join = dplyr::left_join
+    )
+
+    # ensure mapping column also exists under anno_id_col name
+    newdf[[anno_id_col]] <- newdf[[data_id_col]]
+    stopifnot(all.equal(newdf[[data_id_col]], colData(D)[[data_id_col]]))
+
+    rownames(newdf) <- colnames(D)
+    colData(D) <- S4Vectors::DataFrame(newdf)
+
+    # replace sample names?
+    if (!is.na(replace_names_col_eff)) {
+      if (!(replace_names_col_eff %in% colnames(newdf))) {
+        stop(glue::glue("replace_names_col '{replace_names_col}' (effective: '{replace_names_col_eff}') not found in annotations."))
+      }
+      cn <- as.vector(newdf[[replace_names_col_eff]])
+      colnames(D) <- cn
     }
 
-
-  } else if (anno_type=="features") {
+  } else if (anno_type == "features") {
     # ensure the data_id_col column exists
-    if (!(data_id_col %in% colnames(rowData(D)))) stop(glue::glue("ID column '{data_id_col}' does not exist in current feature annotations of SE"))
-    # ensure no columns in annotation df already exist in rowData
-    anno_col_names <- df %>% dplyr::select(-dplyr::one_of(anno_id_col)) %>% colnames()
-    data_col_names <- rowData(D) %>% as.data.frame() %>% dplyr::select(-dplyr::one_of(data_id_col)) %>% colnames()
-    if(any(anno_col_names %in% data_col_names)) stop("Annotation column names already exist in rowData.")
-    # check that all features are found in the $name column of the existing dataset
+    if (!(data_id_col %in% colnames(rowData(D))))
+      stop(glue::glue("ID column '{data_id_col}' does not exist in current feature annotations of SE"))
+
+    # check that all features are found
     m <- match(df[[anno_id_col]], rowData(D)[[data_id_col]])
     if (any(is.na(m))) {
-      msg <- sprintf("The following feature IDs could not be found in the existing data matrix: %s",paste0(df[[data_id_col]][is.na(m)],collapse=","))
+      msg <- sprintf("The following feature IDs could not be found in the existing data: %s",
+                     paste0(df[[anno_id_col]][is.na(m)], collapse = ","))
       if (no_map_err) stop(msg)
-      # else mti_logwarning(msg)
     }
-    # check no annotations are duplicated
-    if(any(duplicated(df[!is.na(m),anno_id_col]))) stop(glue::glue("The ID column '{anno_id_col}' of the annotation data frame contains duplicated values."))
-    # make everything a string
+
+    # check no annotations are duplicated for mapped rows
+    if (any(duplicated(df[!is.na(m), anno_id_col])))
+      stop(glue::glue("The ID column '{anno_id_col}' of the annotation data frame contains duplicated values."))
+
+    # make everything a string (for safe joins)
     df[[anno_id_col]] %<>% as.character()
     rowData(D)[[data_id_col]] %<>% as.character()
-    # merge data frames
-    newdf <- coalesce_join(data.frame(rowData(D)), df, by = setNames(anno_id_col,data_id_col), join=dplyr::left_join)
-    newdf[[anno_id_col]] <- newdf[[data_id_col]] # make sure anno column name also exists (if different from data column name)
-    stopifnot(all.equal(newdf[[data_id_col]],rowData(D)[[data_id_col]])) # to make sure nothing was mixed up
-    rownames(newdf) <- rownames(D)
-    rowData(D) <- DataFrame(newdf)
 
-    # replace_names_col?
-    if (!is.na(replace_names_col)) {
+    # merge with NA-coalescing; allow existing columns (do not stop on name collisions)
+    newdf <- coalesce_join(
+      data.frame(rowData(D), check.names = FALSE),
+      df,
+      by   = setNames(anno_id_col, data_id_col),
+      join = dplyr::left_join
+    )
+
+    # ensure mapping column also exists under anno_id_col name
+    newdf[[anno_id_col]] <- newdf[[data_id_col]]
+    stopifnot(all.equal(newdf[[data_id_col]], rowData(D)[[data_id_col]]))
+
+    rownames(newdf) <- rownames(D)
+    rowData(D) <- S4Vectors::DataFrame(newdf)
+
+    # replace_names_col is not supported for features
+    if (!is.na(replace_names_col_eff)) {
       stop("replace_names_col cannot be used for feature annotations")
     }
 
-  } else
+  } else {
     stop("bug")
-
-  # colData and rowData cannot have overlapping names
-  inters <- intersect(colnames(colData(D)), rownames(D))
-  if (length(inters)>0) {
-    stop(sprintf("There are features (rowData) and sample (colData) variables with the same name: %s", paste0(inters, collapse = ", ")))
   }
 
+  # colData and rowData must not reuse the same variable names
+  inters <- intersect(colnames(colData(D)), colnames(rowData(D)))
+  if (length(inters) > 0) {
+    stop(sprintf(
+      "There are feature (rowData) and sample (colData) variables with the same name: %s",
+      paste0(inters, collapse = ", ")
+    ))
+  }
 
   # add status information
   funargs <- mti_funargs()
-  D %<>% 
-    mti_generate_result(
-      funargs = funargs,
-      logtxt = glue::glue("loaded {anno_type} annotations from Excel file '{basename(file)}, sheet '{sheet}'")
-    )
+  D %<>% mti_generate_result(
+    funargs = funargs,
+    logtxt  = glue::glue("loaded {anno_type} annotations from Excel file '{basename(file)}', sheet '{sheet}'")
+  )
 
-  # return
   D
-
-
 }
+
 
 
 # from https://alistaire.rbind.io/blog/coalescing-joins/
@@ -185,11 +218,6 @@ coalesce_join <- function(x,
       # combine
       dplyr::coalesce(v1, v2)
     }) %>% as.data.frame() %>% dplyr::as_tibble()
-    # original code, not type safe
-    # coalesced <- purrr::map_dfc(to_coalesce, ~dplyr::coalesce(
-    #   joined[[paste0(.x, suffix[1])]],
-    #   joined[[paste0(.x, suffix[2])]]
-    # ))
 
     names(coalesced) <- to_coalesce
     cbind(joined, coalesced)[cols] %>% dplyr::as_tibble()
@@ -198,4 +226,3 @@ coalesce_join <- function(x,
     joined
   }
 }
-
