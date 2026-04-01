@@ -22,6 +22,12 @@
 #'    predict function. See mpalet-implemented ml functions for default parameters used. Default: empty list.
 #' @param pos_class Required if response_type = "binary". Indicates which value in the response column
 #'    represents the positive class.
+#' @param remove_outcome_nas Logical indicating whether to automatically filter out samples with NA values in the
+#'    response variable. If FALSE (default), the function will stop with an error when NAs are detected. If TRUE,
+#'    samples with NA response values will be filtered out and the filtering will be logged.
+#' @param remove_predictor_nas Logical indicating whether to automatically filter out samples with NA values in the
+#'    predictor variables (features or covariates). If FALSE (default), the function will stop with an error when NAs
+#'    are detected. If TRUE, samples with NA predictor values will be filtered out and the filtering will be logged.
 #'
 #' @return result$output: List containing a list of results for each fold.
 #'
@@ -39,25 +45,69 @@ mt_ml_repeat <- function(D,
                          rand_seed,
                          mod_args = list(),
                          pred_args = list(),
-                         pos_class){
+                         pos_class,
+                         remove_outcome_nas = FALSE,
+                         remove_predictor_nas = FALSE){
 
   # Validate arguments
   ml_fun_name <- deparse(substitute(ml_fun))
   required <- c("D", "ml_fun", "ml_name", "response_col")
   passed <- names(as.list(match.call())[-1])
-  if(all(required %in% passed)==F) stop(paste0("Missing one or more required arguments: "),
-                                        paste0(required, collapse = ", "))
-  if("SummarizedExperiment" %in% class(D) == F) stop("D must be a SummarizedExperiment object.")
-  if(response_type == "binary" && missing(pos_class)) stop("A value must be provided for 'pos_class' when response_type is 'binary'.")
+  if(all(required %in% passed)==F) {
+    missing_args <- required[!required %in% passed]
+    stop(glue::glue(
+      "Missing required argument(s): {paste(missing_args, collapse = ', ')}\n",
+      "Required arguments are: {paste(required, collapse = ', ')}"
+    ))
+  }
+  if("SummarizedExperiment" %in% class(D) == F) {
+    stop(glue::glue(
+      "D must be a SummarizedExperiment object.\n",
+      "Received object of class: {paste(class(D), collapse = ', ')}"
+    ))
+  }
+  if(response_type == "binary" && missing(pos_class)) {
+    stop(glue::glue(
+      "A value must be provided for 'pos_class' when response_type is 'binary'.\n",
+      "The 'pos_class' parameter specifies which value in '{response_col}' represents the positive class.\n",
+      "Example: pos_class = 1 (if your positive class is coded as 1)"
+    ))
+  }
   # if(find(ml_fun) != "package:maplet") stop(glue::glue("Could not find {ml_fun} in package maplet."))
   # NOTE TO KELSEY: Add checks later
   # - add check ml_name not used
-  # - add check response_col is column in colData
   # - add check sampling_method is valid
+
+  # Validate response_col exists in colData
+  if(!response_col %in% colnames(colData(D))) {
+    stop(glue::glue(
+      "Response column '{response_col}' not found in colData.\n",
+      "Available columns: {paste(colnames(colData(D)), collapse = ', ')}"
+    ))
+  }
 
   x <- t(assay(D))   # data frame to be split into training / testing
   y <- colData(D)[,response_col]   # corresponding class labels
   if (missing(rand_seed)) rand_seed <- NULL
+
+  # Check for NA values in response variable
+  n_samples_removed <- 0
+  if (any(is.na(y))) {
+    n_na <- sum(is.na(y))
+    if (remove_outcome_nas) {
+      na_idx <- is.na(y)
+      D <- D[, !na_idx]
+      n_samples_removed <- n_na
+      x <- t(assay(D))
+      y <- colData(D)[,response_col]
+      message(glue::glue("Removed {n_samples_removed} sample(s) with missing values in response variable '{response_col}'."))
+    } else {
+      stop(glue::glue("Response variable '{response_col}' contains {n_na} missing value(s). ",
+                      "Please filter the SummarizedExperiment object to remove samples with NA in '{response_col}' before running machine learning.\n",
+                      "Example: D <- D[, !is.na(D$colData${response_col})]",
+                      "\nAlternatively, set remove_outcome_nas = TRUE to automatically filter out samples with missing response values."))
+    }
+  }
 
   # if covariates provided, append to end of data matrix
   if(!missing(covar_cols)){
@@ -71,13 +121,42 @@ mt_ml_repeat <- function(D,
 
   }
 
+  # Check for NA values in predictor matrix (features + covariates)
+  na_in_predictors <- apply(x, 1, function(row) any(is.na(row)))
+  if (any(na_in_predictors)) {
+    n_na_predictors <- sum(na_in_predictors)
+    if (remove_predictor_nas) {
+      D <- D[, !na_in_predictors]
+      x <- x[!na_in_predictors, ]
+      y <- y[!na_in_predictors]
+      n_samples_removed <- n_samples_removed + n_na_predictors
+      message(glue::glue("Removed {n_na_predictors} sample(s) with missing values in predictor variables (features or covariates)."))
+    } else {
+      stop(glue::glue("Predictor matrix contains {n_na_predictors} sample(s) with missing value(s). ",
+                      "Please filter the SummarizedExperiment object to remove samples with NA in predictor variables before running machine learning.\n",
+                      "Alternatively, set remove_predictor_nas = TRUE to automatically filter out samples with missing predictor values."))
+    }
+  }
+
   # for binary case, ensure y is of type factor and pos_class is the first level
   if(response_type=="binary"){
     y_vals = unique(y)
     pos_idx = which(y_vals==pos_class)
 
-    if(length(pos_idx)==0) stop("The provided value for 'pos_class' was not found in the response column.")
-    if(length(y_vals)>2) stop("'response_type' is 'binary' but 'response_col' has more than two values.")
+    if(length(pos_idx)==0) {
+      stop(glue::glue(
+        "The provided value for 'pos_class' ({pos_class}) was not found in response column '{response_col}'.\n",
+        "Found values: {paste(y_vals, collapse = ', ')} (type: {class(y_vals)[1]})\n",
+        "Please ensure 'pos_class' matches one of the actual values in your data."
+      ))
+    }
+    if(length(y_vals)>2) {
+      stop(glue::glue(
+        "'response_type' is set to 'binary' but '{response_col}' contains {length(y_vals)} unique values.\n",
+        "Found values: {paste(y_vals, collapse = ', ')}\n",
+        "Binary classification requires exactly 2 unique values."
+      ))
+    }
 
     y <- factor(y, levels=c(y_vals[pos_idx], y_vals[-pos_idx]))
   }else{
@@ -85,11 +164,15 @@ mt_ml_repeat <- function(D,
   }
 
   # --- Choose Sampling Method --- #
-  # k-fold cross-validation is only one implemented right now; will add others later
 
   # perform classic k-fold cross-validation
   if(sampling_method == "cv"){
-    if(missing(num_folds)) stop("When performing k-fold cross-validation, a value for argument num_folds must be provided.")
+    if(missing(num_folds)) {
+      stop(glue::glue(
+        "When performing k-fold cross-validation, a value for argument 'num_folds' must be provided.\n",
+        "Example: num_folds = 5 (for 5-fold cross-validation)"
+      ))
+    }
     test_idx <- make_cv_partitions(x, y, num_folds, rand_seed, response_type)
   }
 
@@ -106,10 +189,14 @@ mt_ml_repeat <- function(D,
     logtxt = paste(glue::glue("Performed {ml_fun_name}, with covariates {val_cc_str}, repeated using {sampling_method} method."))
   }
 
+  if(n_samples_removed > 0){
+    logtxt = paste(logtxt, glue::glue("Removed {n_samples_removed} sample(s) with missing values in response variable '{response_col}'."))
+  }
+
   # add status information
-  funargs <- maplet:::mti_funargs()
+  funargs <- mti_funargs()
   D %<>%
-    maplet:::mti_generate_result(
+    mti_generate_result(
       funargs = funargs,
       logtxt = logtxt,
       output = list(name = ml_name,
@@ -127,8 +214,6 @@ mt_ml_repeat <- function(D,
 }
 
 # Training / Testing function
-# This function for subsets the data frames / labels, calls the implemented algorithms, and
-#    gets the predicted values.
 run_train_test <- function(idx, ml_fun_name, x, y, response_type, mod_args, pred_args){
 
   # subset training / testing data and training labels
@@ -145,7 +230,7 @@ run_train_test <- function(idx, ml_fun_name, x, y, response_type, mod_args, pred
   pred_args <- do.call(ml_fun, ml_fun_args)
 
   # get predicted values
-  if(is.null(pred_args$type)) pred_args$type <- "response" # get class probabilities by default
+  if(is.null(pred_args$type)) pred_args$type <- "response"
   pred <- do.call(predict, pred_args)
 
   fold_res <- list(test_idx = idx, pred = as.numeric(pred))
@@ -156,13 +241,10 @@ run_train_test <- function(idx, ml_fun_name, x, y, response_type, mod_args, pred
 
 
 # Cross-Validation / Sampling Functions
-# k-fold cross-validation
 make_cv_partitions <- function(x, y, num_folds, rand_seed, response_type){
 
-  # set random seed
   if (!is.null(rand_seed)) set.seed(rand_seed)
 
-  # create folds
   if(response_type=="binary"){
     idx_lists <- caret::createFolds(y, k=num_folds)
   }else{
@@ -194,5 +276,3 @@ create_fold_splits <- function(y, nfolds){
 }
 
 # TO-DO: Add additional functions for other cross-validation methods
-
-
