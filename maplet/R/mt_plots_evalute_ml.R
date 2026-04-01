@@ -468,8 +468,18 @@ create_cor_plots <- function(num_folds, pred_list, labels, test_idx_list, all_un
     plot_list <- c(plot_list, list(p))
   }
 
-  data_annotate <- data.frame(fold = unique(plot_df$fold),
-                              annotate = glue::glue("mse: {round(unique(plot_df$mse),2)}\ncor: {round(unique(plot_df$cor),2)}"))
+  data_annotate <- plot_df %>%
+    dplyr::group_by(fold) %>%
+    dplyr::summarise(
+      mse = unique(mse)[1],
+      cor = unique(cor)[1],
+      .groups = 'drop'
+    ) %>%
+    dplyr::mutate(
+      mse_txt = ifelse(is.na(mse), "NA", as.character(round(mse, 2))),
+      cor_txt = ifelse(is.na(cor), "NA", as.character(round(cor, 2))),
+      annotate = paste0("mse: ", mse_txt, "\ncor: ", cor_txt)
+    )
 
   p <- ggplot(plot_df, aes(x = pred, y = lab)) +
     geom_point() +
