@@ -2,6 +2,7 @@
 
 export(mt_anno_apply)
 export(mt_anno_class)
+export(mt_anno_df)
 export(mt_anno_hmdb_to_kegg)
 export(mt_anno_missingness)
 export(mt_anno_mutate)
